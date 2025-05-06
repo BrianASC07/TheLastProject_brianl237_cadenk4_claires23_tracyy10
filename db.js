@@ -45,6 +45,22 @@ function addWin(user) {
   });
 }
 
+let mafia = function(user) {
+  return new Promise((resolve) => {
+    db.get('SELECT wins FROM users WHERE username = ?', [user], (err, row) => {
+      resolve(row["wins"]);
+    });
+  });
+}
+
+var bye;
+let winCount = mafia("abc");
+winCount.then(function(result) {
+  bye = result;
+});
+console.log(bye);
+console.log(winCount);
+
 function close() {
   db.close((err) => {
     if (err) {
@@ -54,5 +70,5 @@ function close() {
 }
 
 setup();
-getWins("abc");
+
 close();
