@@ -17,9 +17,15 @@ io.on("connection", (socket) => { // whenever a connection to the serve is detec
     console.log(`User connected: ${socket.id}`); // every connection is given a unique id
                 //               like f-strings but in js...
 
-    socket.on("join_room", (data) => { // whenever the function join_room is emitted from fromend
+    socket.on("join_room", (data) => { // whenever the function join_room is emitted from frontend
         socket.join(data); // adds you to an arbitrary room; you can now emit messages to everyone in that room at once (like clumping...) (https://socket.io/docs/v3/rooms/) 
         console.log(`User with ID: ${socket.id} joined room: ${data}`)
+    });
+
+    socket.on("send_message", (data) => {
+        // console.log(data);
+        socket.to(data.room).emit("receive_message", data); // calls the receive_message func in the frontend file
+        // emits the message only to the people in that room
     });
 
     socket.on("disconnect", () => {
