@@ -5,11 +5,14 @@ Our project will be a multiplayer mafia game where players can create or join pu
 ## Roster & Roles
 Brian Liu (PM) – Node.js
   - Implementing functions that help the game run using JS, such as role functionality.
+
 Caden Khuu – Frontend
   - Create templates and make website look nice with Tailwind and CSS
   - Help out with NodeJS
+
 Claire Song – SQLite Database
   - Creating tables to keep track of user information and player information
+
 Tracy Ye – Node.js
   - Linking pages and backend using NodeJS
   - Implement multiplayer, party system, and real-time updating of information within the game. 
