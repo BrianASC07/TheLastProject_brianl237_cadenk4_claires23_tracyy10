@@ -41,7 +41,7 @@ $ foo\Scripts\activate
 ```
 4. Install required packages
 ```
-$ pip install -r requirements.txt
+$ npm i
 ```
 ## Launch Codes
 Our project can be launched locally by carrying out the following steps. 
