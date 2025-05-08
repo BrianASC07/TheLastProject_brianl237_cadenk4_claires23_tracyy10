@@ -61,8 +61,8 @@ $ foo\Scripts\activate
 ```
 $ cd app
 ```
-4. Run the Flask app
+4. Run the Node app
 ```
-$ python3 __init__.py
+$ node app.js
 ```
 5. Navigate to localhost: http://127.0.0.1:5000
