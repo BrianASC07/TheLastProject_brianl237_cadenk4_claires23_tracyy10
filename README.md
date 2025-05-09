@@ -63,6 +63,6 @@ $ cd app
 ```
 4. Run the Node app
 ```
-$ node app.js
+$ node npm start
 ```
-5. Navigate to localhost: http://127.0.0.1:5000
+5. Navigate to localhost: http://localhost:3000/
