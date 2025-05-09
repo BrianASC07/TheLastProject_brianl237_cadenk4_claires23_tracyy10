@@ -4,7 +4,7 @@ const http = require("http");
 const cors = require("cors");
 const { Server } = require("socket.io");
 const sqlite3 = require('sqlite3');
-import { get_roles_in_room, pick_role } from './db.js';
+import { get_roles_in_room, pick_role, add_to_room } from './db.js';
 app.use(cors());
 
 const server = http.createServer(app);
@@ -19,18 +19,12 @@ io.on("connection", (socket) => { // whenever a connection to the serve is detec
     console.log(`User connected: ${socket.id}`); // every connection is given a unique id
                 //               like f-strings but in js...
 
-    socket.on("join_room", (data) => { // whenever the function join_room is emitted from frontend
+    socket.on("join_room", async(data) => { // whenever the function join_room is emitted from frontend
         const in_room = await get_roles_in_room(data); // returns array of roles in given room
-        if (in_room.length < 5) {
+        if (in_room.length < 5) = async() => {
             socket.join(data); // adds you to an arbitrary room; you can now emit messages to everyone in that room at once (like clumping...) (https://socket.io/docs/v3/rooms/)
             const role = pick_role(in_room); // returns random role
-            db.run("INSERT INTO rooms (user_id, room_id, role) VALUES (?, ?, ?)", [socket.id, data, role], function(err) {
-                if (err) {
-                    return console.log(err.message);
-                }
-                console.log(`Inserted ${socket.id} into room ${data} as ${role}`);
-                db.close();
-            });
+            await add_to_room(socket.id, data, role);
         }
         // else stay in waiting room!!!
         // right now waiting room does not exist
