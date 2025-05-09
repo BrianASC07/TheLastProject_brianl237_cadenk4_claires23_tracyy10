@@ -37,13 +37,23 @@ const pick_role = (in_room) => {
 io.on("connection", (socket) => { // whenever a connection to the serve is detected, grabs 'socket' or the information of the connection 
     console.log(`User connected: ${socket.id}`); // every connection is given a unique id
                 //               like f-strings but in js...
+
     const db = new sqlite3.Database("./database");
     db.run("CREATE TABLE IF NOT EXISTS rooms(user_id TEXT, room_id TEXT, role TEXT)");
     db.close();
 
+// https://stackoverflow.com/questions/65454450/how-to-assign-a-variable-to-the-output-of-a-sqlite-query-in-node-js
+
     socket.on("join_room", (data) => { // whenever the function join_room is emitted from frontend
         const db = new sqlite3.Database("./database");
-        const in_room = db.all(`SELECT role FROM rooms WHERE room_id = ${data}`);
+        db.all("SELECT role FROM rooms WHERE room_id = ?", [data], (err, rows) => {
+            if (err) {
+                console.log(err.message);
+            }
+            console.log(rows);
+            const in_room = rows;
+        });
+        console.log(in_room);
         if (in_room.length < 5) {
             socket.join(data); // adds you to an arbitrary room; you can now emit messages to everyone in that room at once (like clumping...) (https://socket.io/docs/v3/rooms/)
             const role = pick_role(in_room);
@@ -55,7 +65,6 @@ io.on("connection", (socket) => { // whenever a connection to the serve is detec
                 db.close();
             });
         }
-        console.log(db.run("SELECT * FROM rooms;"));
         // else stay in waiting room!!!
         // right now waiting room does not exist
         // so you will progress to chat room eitherway
