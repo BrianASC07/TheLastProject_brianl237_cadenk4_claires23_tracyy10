@@ -1,4 +1,4 @@
-# TBD by The Last Project
+# A Mafia Among Us (TBD) by The Last Project
 ## Description
 Our project will be a multiplayer mafia game where players can create or join public lobbies and get a randomly assigned role: mafia, doctor, sheriff, or civilian. Once the game starts, it will alternate between day and night time phases. During the night, the mafia, doctor, and sheriff will pick someone to kill, save, or investigate respectively. During the day, players will type to each other in the chat and then vote on who they think the mafia is. The game ends when either all the mafia or all the innocent players are eliminated.
 
