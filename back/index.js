@@ -19,9 +19,9 @@ io.on("connection", (socket) => { // whenever a connection to the serve is detec
     console.log(`User connected: ${socket.id}`); // every connection is given a unique id
                 //               like f-strings but in js...
 
-    socket.on("join_room", async(data) => { // whenever the function join_room is emitted from frontend
+    socket.on("join_room", (data) => { // whenever the function join_room is emitted from frontend
         const in_room = await get_roles_in_room(data); // returns array of roles in given room
-        if (in_room.length < 5) = async() => {
+        if (in_room.length < 5) {
             socket.join(data); // adds you to an arbitrary room; you can now emit messages to everyone in that room at once (like clumping...) (https://socket.io/docs/v3/rooms/)
             const role = pick_role(in_room); // returns random role
             await add_to_room(socket.id, data, role);
