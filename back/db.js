@@ -108,19 +108,27 @@ function remove_from_room(user_id) {
   });
 }
 
-
-const temp_room = "123";
-const temp_user_id = "aurum";
-await createTable();
-console.log(await get_roles_in_room(temp_room));
-await add_to_room(temp_user_id, temp_room, pick_role(await get_roles_in_room(temp_room)));
-console.log(await get_roles_in_room(temp_room));
-await add_to_room("a", temp_room, pick_role(await get_roles_in_room(temp_room)));
-console.log(await get_roles_in_room(temp_room));
-await add_to_room("b", temp_room, pick_role(await get_roles_in_room(temp_room)));
-console.log(await get_roles_in_room(temp_room));
-await add_to_room("c", temp_room, pick_role(await get_roles_in_room(temp_room)));
-console.log(await get_roles_in_room(temp_room));
-await add_to_room("d", temp_room, pick_role(await get_roles_in_room(temp_room)));
-console.log(await get_roles_in_room(temp_room));
-await remove_from_room(temp_user_id);
+(async () => {
+  const temp_room = "123";
+  const temp_user_id = "aurum";
+  
+  await createTable();
+  console.log(await get_roles_in_room(temp_room));
+  
+  await add_to_room(temp_user_id, temp_room, pick_role(await get_roles_in_room(temp_room)));
+  console.log(await get_roles_in_room(temp_room));
+  
+  await add_to_room("a", temp_room, pick_role(await get_roles_in_room(temp_room)));
+  console.log(await get_roles_in_room(temp_room));
+  
+  await add_to_room("b", temp_room, pick_role(await get_roles_in_room(temp_room)));
+  console.log(await get_roles_in_room(temp_room));
+  
+  await add_to_room("c", temp_room, pick_role(await get_roles_in_room(temp_room)));
+  console.log(await get_roles_in_room(temp_room));
+  
+  await add_to_room("d", temp_room, pick_role(await get_roles_in_room(temp_room)));
+  console.log(await get_roles_in_room(temp_room));
+  
+  await remove_from_room(temp_user_id);
+})();
