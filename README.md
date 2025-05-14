@@ -39,6 +39,6 @@ $ cd git@github.com:BrianASC07/TheLastProject_brianl237_cadenk4_claires23_tracyy
 ```
 2. Run the Node app
 ```
-$ node npm start
+$ npm start
 ```
 3. Navigate to localhost: http://localhost:3000/
