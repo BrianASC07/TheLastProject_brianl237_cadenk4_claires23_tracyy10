@@ -3,12 +3,13 @@ import { Chat } from './Chat.js';
 import io from 'socket.io-client'; // front end must be started ('npm start') !!!
 import { useState } from "react";
 
-const socket = io.connect("http://localhost:3000"); // connects this to the backend 
+const socket = io.connect("http://localhost:3000"); // connects this to the backend
 
 function App() {
   const [username, setUsername] = useState(""); // useState keeps track of the updated state of the variable
   const [room, setRoom] = useState(""); // ref below...
   const [showChat, setShowChat] = useState(false);
+  console.log(username, setUsername, room, setRoom, showChat, setShowChat);
 
   const joinRoom = () => {
     if (username !== "" && room !== "") { // requirements to join
@@ -22,17 +23,17 @@ function App() {
       {!showChat ? ( // if showChat is false, allow to join
         <div className="joinChatContainer">
           <h3> join chat </h3>
-          <input 
-            type="text" 
-            placeholder="Name..." 
+          <input
+            type="text"
+            placeholder="Name..."
             onChange={(event) => // takes in the event (the inputted text)
-              {setUsername(event.target.value); // updates the variable setUsername with input 
+              {setUsername(event.target.value); // updates the variable setUsername with input
             }}
           />
-          <input 
-            type="text" 
-            placeholder="Room ID..." 
-            onChange={(event) => 
+          <input
+            type="text"
+            placeholder="Room ID..."
+            onChange={(event) =>
               {setRoom(event.target.value);
             }}
           />
