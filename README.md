@@ -25,7 +25,7 @@ Our project can be installed locally by carrying out the following steps. Users 
 $ git clone git@github.com:BrianASC07/TheLastProject_brianl237_cadenk4_claires23_tracyy10.git
 ```
 ```
-$ cd TheLastProject_brianl237_cadenk4_claires23_tracyy10.git
+$ cd TheLastProject_brianl237_cadenk4_claires23_tracyy10.git/app
 ```
 2. Install required packages
 ```
@@ -35,7 +35,7 @@ $ npm i
 Our project can be launched locally by carrying out the following steps. 
 1. Move into this repository
 ```
-$ cd git@github.com:BrianASC07/TheLastProject_brianl237_cadenk4_claires23_tracyy10.git
+$ cd git@github.com:BrianASC07/TheLastProject_brianl237_cadenk4_claires23_tracyy10.git/app
 ```
 2. Run the Node app
 ```
