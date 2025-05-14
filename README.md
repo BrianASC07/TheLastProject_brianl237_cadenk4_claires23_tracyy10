@@ -27,19 +27,7 @@ $ git clone git@github.com:BrianASC07/TheLastProject_brianl237_cadenk4_claires23
 ```
 $ cd TheLastProject_brianl237_cadenk4_claires23_tracyy10.git
 ```
-2. Create a virtual environment
-```
-$ python3 -m venv foo
-```
-3. Activate the virtual environment: Linux/MacOS
-```
-$ . foo/bin/activate
-```
-3. Activate the virtual environment: Windows
-```
-$ foo\Scripts\activate
-```
-4. Install required packages
+2. Install required packages
 ```
 $ npm i
 ```
@@ -49,20 +37,8 @@ Our project can be launched locally by carrying out the following steps.
 ```
 $ cd git@github.com:BrianASC07/TheLastProject_brianl237_cadenk4_claires23_tracyy10.git
 ```
-2. Activate the virtual environment: Linux/MacOS
-```
-$ . foo/bin/activate
-```
-2. Activate the virtual environment: Windows
-```
-$ foo\Scripts\activate
-```
-3. Move into the app directory
-```
-$ cd app
-```
-4. Run the Node app
+2. Run the Node app
 ```
 $ node npm start
 ```
-5. Navigate to localhost: http://localhost:3000/
+3. Navigate to localhost: http://localhost:3000/
