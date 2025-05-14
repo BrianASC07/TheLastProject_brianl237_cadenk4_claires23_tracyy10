@@ -3,11 +3,11 @@ import sqlite3 from 'sqlite3';
 
 function connect() {
   const db = new sqlite3.Database('database.db', (err) => {
-        if (err) {
-          console.log(err.message);
-        }
-        // console.log('>>> Connected to the database.');
-      });
+    if (err) {
+      console.log(err.message);
+    }
+    // console.log('>>> Connected to the database.');
+  });
   return db;
 }
 
@@ -72,7 +72,7 @@ function add_to_room(user_id, room_id, role) {
         console.log(err.message);
         reject(err);
       }
-        resolve(console.log(`Inserted ${user_id} into room ${room_id} as ${role}`));
+      resolve(console.log(`Inserted ${user_id} into room ${room_id} as ${role}`));
     });
     close(db);
   });
@@ -109,26 +109,30 @@ function remove_from_room(user_id) {
 }
 
 (async () => {
-  const temp_room = "123";
-  const temp_user_id = "aurum";
+  try {
+    const temp_room = "123";
+    const temp_user_id = "aurum";
   
-  await createTable();
-  console.log(await get_roles_in_room(temp_room));
+    await createTable();
+    console.log(await get_roles_in_room(temp_room));
   
-  await add_to_room(temp_user_id, temp_room, pick_role(await get_roles_in_room(temp_room)));
-  console.log(await get_roles_in_room(temp_room));
+    await add_to_room(temp_user_id, temp_room, pick_role(await get_roles_in_room(temp_room)));
+    console.log(await get_roles_in_room(temp_room));
   
-  await add_to_room("a", temp_room, pick_role(await get_roles_in_room(temp_room)));
-  console.log(await get_roles_in_room(temp_room));
+    await add_to_room("a", temp_room, pick_role(await get_roles_in_room(temp_room)));
+    console.log(await get_roles_in_room(temp_room));
   
-  await add_to_room("b", temp_room, pick_role(await get_roles_in_room(temp_room)));
-  console.log(await get_roles_in_room(temp_room));
+    await add_to_room("b", temp_room, pick_role(await get_roles_in_room(temp_room)));
+    console.log(await get_roles_in_room(temp_room));
   
-  await add_to_room("c", temp_room, pick_role(await get_roles_in_room(temp_room)));
-  console.log(await get_roles_in_room(temp_room));
+    await add_to_room("c", temp_room, pick_role(await get_roles_in_room(temp_room)));
+    console.log(await get_roles_in_room(temp_room));
   
-  await add_to_room("d", temp_room, pick_role(await get_roles_in_room(temp_room)));
-  console.log(await get_roles_in_room(temp_room));
+    await add_to_room("d", temp_room, pick_role(await get_roles_in_room(temp_room)));
+    console.log(await get_roles_in_room(temp_room));
   
-  await remove_from_room(temp_user_id);
+    await remove_from_room(temp_user_id);
+  } catch (error) {
+    console.error("An error occurred:", error);
+  }
 })();
