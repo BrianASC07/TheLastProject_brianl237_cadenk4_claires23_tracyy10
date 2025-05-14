@@ -34,35 +34,37 @@ function createTable() {
   });
 }
 
-function pick_role(in_room) { // returns a random untaken role
-  const chance = 1/(5-in_room.length)
-  if (structuredClone(in_room).reduce((count, current) => { // if max innocent, then only consider missing roles
-    if (current == "innocent") count++;
+function pick_role(in_room) {
+  const chance = 1 / (5 - in_room.length);
+  
+  // Create a deep copy of in_room using JSON methods
+  const in_room_copy = JSON.parse(JSON.stringify(in_room));
+
+  if (in_room_copy.reduce((count, current) => {
+    if (current === "innocent") count++;
     return count;
-  }) == 2) {
-    const only_consider=[];
+  }, 0) === 2) {
+    const only_consider = [];
     if (!in_room.includes("mafia")) only_consider.push("mafia");
     if (!in_room.includes("cop")) only_consider.push("cop");
     if (!in_room.includes("doctor")) only_consider.push("doctor");
-    return only_consider[Math.floor(Math.random() * only_consider.length)]
-  }
-  else if (!in_room.includes("mafia")) {
-      if (Math.random() <= chance) {
-          return "mafia";
-      }
-  }
-  else if (!in_room.includes("cop")) {
-      if (Math.random() <= chance) {
-          return "cop";
-      }
-  }
-  else if (!in_room.includes("doctor")) {
-      if (Math.random() <= chance) {
-          return "doctor";
-      }
+    return only_consider[Math.floor(Math.random() * only_consider.length)];
+  } else if (!in_room.includes("mafia")) {
+    if (Math.random() <= chance) {
+      return "mafia";
+    }
+  } else if (!in_room.includes("cop")) {
+    if (Math.random() <= chance) {
+      return "cop";
+    }
+  } else if (!in_room.includes("doctor")) {
+    if (Math.random() <= chance) {
+      return "doctor";
+    }
   }
   return "innocent";
 }
+
 
 function add_to_room(user_id, room_id, role) {
   const db = connect();
