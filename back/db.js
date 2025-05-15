@@ -1,5 +1,5 @@
-// const sqlite3 = require('sqlite3');
-import sqlite3 from 'sqlite3';
+const sqlite3 = require('sqlite3');
+// import sqlite3 from 'sqlite3';
 
 function connect() {
   const db = new sqlite3.Database('database.db', (err) => {
@@ -35,36 +35,17 @@ function createTable() {
 }
 
 function pick_role(in_room) {
-  const chance = 1 / (5 - in_room.length);
-  
-  // Create a deep copy of in_room using JSON methods
-  const in_room_copy = JSON.parse(JSON.stringify(in_room));
-
-  if (in_room_copy.reduce((count, current) => {
-    if (current === "innocent") count++;
+  const only_consider = [];
+  if (!in_room.includes("mafia")) only_consider.push("mafia");
+  if (!in_room.includes("cop")) only_consider.push("cop");
+  if (!in_room.includes("doctor")) only_consider.push("doctor");
+  const cnt_innocent = in_room.reduce((count, current) => {
+    if (current == "innocent") count++;
     return count;
-  }, 0) === 2) {
-    const only_consider = [];
-    if (!in_room.includes("mafia")) only_consider.push("mafia");
-    if (!in_room.includes("cop")) only_consider.push("cop");
-    if (!in_room.includes("doctor")) only_consider.push("doctor");
-    return only_consider[Math.floor(Math.random() * only_consider.length)];
-  } else if (!in_room.includes("mafia")) {
-    if (Math.random() <= chance) {
-      return "mafia";
-    }
-  } else if (!in_room.includes("cop")) {
-    if (Math.random() <= chance) {
-      return "cop";
-    }
-  } else if (!in_room.includes("doctor")) {
-    if (Math.random() <= chance) {
-      return "doctor";
-    }
-  }
-  return "innocent";
+  }, 0);
+  for (let i = 0; i < (2-cnt_innocent); i++) { only_consider.push("innocent"); }
+  return only_consider[Math.floor(Math.random() * only_consider.length)];
 }
-
 
 function add_to_room(user_id, room_id, role) {
   const db = connect();
@@ -114,25 +95,25 @@ function remove_from_room(user_id) {
   try {
     const temp_room = "123";
     const temp_user_id = "aurum";
-  
+
     await createTable();
     console.log(await get_roles_in_room(temp_room));
-  
+
     await add_to_room(temp_user_id, temp_room, pick_role(await get_roles_in_room(temp_room)));
     console.log(await get_roles_in_room(temp_room));
-  
+
     await add_to_room("a", temp_room, pick_role(await get_roles_in_room(temp_room)));
     console.log(await get_roles_in_room(temp_room));
-  
+
     await add_to_room("b", temp_room, pick_role(await get_roles_in_room(temp_room)));
     console.log(await get_roles_in_room(temp_room));
-  
+
     await add_to_room("c", temp_room, pick_role(await get_roles_in_room(temp_room)));
     console.log(await get_roles_in_room(temp_room));
-  
+
     await add_to_room("d", temp_room, pick_role(await get_roles_in_room(temp_room)));
     console.log(await get_roles_in_room(temp_room));
-  
+
     await remove_from_room(temp_user_id);
   } catch (error) {
     console.error("An error occurred:", error);
