@@ -23,7 +23,6 @@ export function Chat({ socket, username, room }) {
     useEffect(() => { // will call the function inside the useEffect whenever a specific change in socket occurs
         socket.off("receive_message").on("receive_message", (data) => { // the change will be when 'receive_message' is called
             // socket.off once bc it was sending twice (prevents that instance from running)
-            // console.log(data);
             setMessageList((list) => [...list, data]); // appends data (new message) to the current messageList
         });
     }, [socket]);

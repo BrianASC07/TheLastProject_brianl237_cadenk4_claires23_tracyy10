@@ -1,7 +1,8 @@
 import './App.css';
 import { Chat } from './Chat.js';
 import io from 'socket.io-client'; // front end must be started ('npm start') !!!
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { Night } from './Night.js';
 
 const socket = io.connect("http://localhost:3001"); // connects this to the backend
 
@@ -9,10 +10,11 @@ function App() {
   const [username, setUsername] = useState(""); // useState keeps track of the updated state of the variable
   const [room, setRoom] = useState(""); // ref below...
   const [showChat, setShowChat] = useState(false);
+  const [role, setRole] = useState("");
 
   const joinRoom = () => {
     if (username !== "" && room !== "") { // requirements to join
-      socket.emit("join_room", room) // calls join_room in backend and passes the room id
+      socket.emit("join_room", [room, username]) // calls join_room in backend and passes the room id
     }
   };
 
@@ -20,12 +22,9 @@ function App() {
     if (data === false) setShowChat(true);
   });
 
-  // useEffect(() => {
-  //   socket.on("do_not_join", (data) => {
-  //     console.log(data);
-  //     if (data === true) setShowChat(true);
-  //   });
-  // }, [socket]);
+  socket.on("set_role", (data) => {
+    setRole(data);
+  });
 
   return (
     <div className="App">
@@ -50,7 +49,8 @@ function App() {
           <button onClick={joinRoom}> join room </button>
         </div>
       ) : ( // else show the chat
-        <Chat socket={socket} username={username} room={room} />
+        // <Chat socket={socket} username={username} room={room} />
+        <Night socket={ socket } username={ username } room={ room } role={ role } />
       )}
     </div>
   );
