@@ -12,19 +12,12 @@ function App() {
 
   const joinRoom = () => {
     if (username !== "" && room !== "") { // requirements to join
-      console.log("ffff");
       socket.emit("join_room", room) // calls join_room in backend and passes the room id
-      console.log("eeee");
     }
   };
 
-  // socket.on("hello", (data) => {
-  //   console.log(data);
-  // });
-
   socket.on("do_not_join", (data) => {
-    console.log(data);
-    if (data === true) setShowChat(true);
+    if (data === false) setShowChat(true);
   });
 
   // useEffect(() => {
@@ -43,19 +36,20 @@ function App() {
             type="text"
             placeholder="Name..."
             onChange={(event) => // takes in the event (the inputted text)
-              {setUsername(event.target.value); // updates the variable setUsername with input
+            {
+              setUsername(event.target.value); // updates the variable setUsername with input
             }}
           />
           <input
             type="text"
             placeholder="Room ID..."
-            onChange={(event) =>
-              {setRoom(event.target.value);
+            onChange={(event) => {
+              setRoom(event.target.value);
             }}
           />
           <button onClick={joinRoom}> join room </button>
         </div>
-        ) : ( // else show the chat
+      ) : ( // else show the chat
         <Chat socket={socket} username={username} room={room} />
       )}
     </div>

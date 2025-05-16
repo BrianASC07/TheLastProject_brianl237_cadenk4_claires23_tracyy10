@@ -8,51 +8,53 @@ app.use(cors());
 
 const server = http.createServer(app);
 const io = new Server(server, {
-    cors:{ // cors configures socket.io to prevent errors later on...
-        origin: "http://localhost:3000", // tells socket.io to accept requests from this location
-        methods: ["GET", "POST"],
-    },
+  cors: { // cors configures socket.io to prevent errors later on...
+    origin: "http://localhost:3000", // tells socket.io to accept requests from this location
+    methods: ["GET", "POST"],
+  },
 });
 
 io.on("connection", (socket) => { // whenever a connection to the serve is detected, grabs 'socket' or the information of the connection 
-    ( async () => { try { await createTable() } catch (error) {} })();
-    console.log(`User connected: ${socket.id}`); // every connection is given a unique id
-                //               like f-strings but in js...
+  (async () => { try { await createTable() } catch (error) { } })();
+  console.log(`User connected: ${socket.id}`); // every connection is given a unique id
+  //               like f-strings but in js...
 
-    socket.on("join_room", (data) => { // whenever the function join_room is emitted from frontend
-        (async () => {
-            try {
-                const in_room = await get_roles_in_room(data);
-                if (in_room.length < 5) {
-                    await add_to_room(socket.id, data, await pick_role(await get_roles_in_room(data)));
-                    socket.join(data); // adds you to an arbitrary room; you can now emit messages to everyone in that room at once (like clumping...) (https://socket.io/docs/v3/rooms/) 
-                    console.log(`User with ID: ${socket.id} joined room: ${data}`);
-                }
-                else {
-                    console.log(`Room ${data} is full.`);
-                }
-            } catch (error) {}
-        }) ();
+  socket.on("join_room", (data) => { // whenever the function join_room is emitted from frontend
+    (async () => {
+      try {
+        const in_room = await get_roles_in_room(data);
+        if (in_room.length < 5) {
+          socket.emit("do_not_join", false);
+          await add_to_room(socket.id, data, await pick_role(await get_roles_in_room(data)));
+          socket.join(data); // adds you to an arbitrary room; you can now emit messages to everyone in that room at once (like clumping...) (https://socket.io/docs/v3/rooms/) 
+          console.log(`User with ID: ${socket.id} joined room: ${data}`);
+        }
+        else {
+          socket.emit("do_not_join", true);
+          console.log(`Room ${data} is full.`);
+        }
+      } catch (error) { }
+    })();
 
 
 
 
-    });
+  });
 
-    socket.on("send_message", (data) => {
-        // console.log(data);
-        socket.to(data.room).emit("receive_message", data); // calls the receive_message func in the frontend file
-        // emits the message only to the people in that room
-    });
+  socket.on("send_message", (data) => {
+    // console.log(data);
+    socket.to(data.room).emit("receive_message", data); // calls the receive_message func in the frontend file
+    // emits the message only to the people in that room
+  });
 
-    socket.on("disconnect", () => {
-        ( async () => { try { await remove_from_room(socket.id) } catch (error) {} })();
-        console.log("User disconnected: ", socket.id) // listens to disconnects from the server
-    });
+  socket.on("disconnect", () => {
+    (async () => { try { await remove_from_room(socket.id) } catch (error) { } })();
+    console.log("User disconnected: ", socket.id) // listens to disconnects from the server
+  });
 });
 
 server.listen(3001, () => { // run 'npm start'
-    console.log("SEVERE IS RUNNING");
+  console.log("SEVERE IS RUNNING");
 });
 
 function connect() {
@@ -97,7 +99,7 @@ function pick_role(in_room) {
     if (current == "innocent") count++;
     return count;
   }, 0);
-  for (let i = 0; i < (2-cnt_innocent); i++) { only_consider.push("innocent"); }
+  for (let i = 0; i < (2 - cnt_innocent); i++) { only_consider.push("innocent"); }
   return only_consider[Math.floor(Math.random() * only_consider.length)];
 }
 
