@@ -36,7 +36,7 @@ function createTable() {
 
 function pick_role(in_room) {
   const chance = 1 / (5 - in_room.length);
-  
+
   // Create a deep copy of in_room using JSON methods
   const in_room_copy = JSON.parse(JSON.stringify(in_room));
 
@@ -114,25 +114,25 @@ function remove_from_room(user_id) {
   try {
     const temp_room = "123";
     const temp_user_id = "aurum";
-  
+
     await createTable();
     console.log(await get_roles_in_room(temp_room));
-  
+
     await add_to_room(temp_user_id, temp_room, pick_role(await get_roles_in_room(temp_room)));
     console.log(await get_roles_in_room(temp_room));
-  
+
     await add_to_room("a", temp_room, pick_role(await get_roles_in_room(temp_room)));
     console.log(await get_roles_in_room(temp_room));
-  
+
     await add_to_room("b", temp_room, pick_role(await get_roles_in_room(temp_room)));
     console.log(await get_roles_in_room(temp_room));
-  
+
     await add_to_room("c", temp_room, pick_role(await get_roles_in_room(temp_room)));
     console.log(await get_roles_in_room(temp_room));
-  
+
     await add_to_room("d", temp_room, pick_role(await get_roles_in_room(temp_room)));
     console.log(await get_roles_in_room(temp_room));
-  
+
     await remove_from_room(temp_user_id);
   } catch (error) {
     console.error("An error occurred:", error);

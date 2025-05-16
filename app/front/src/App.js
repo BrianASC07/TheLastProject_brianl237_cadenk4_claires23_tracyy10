@@ -3,7 +3,7 @@ import { Chat } from './Chat.js';
 import io from 'socket.io-client'; // front end must be started ('npm start') !!!
 import { useState } from "react";
 
-const socket = io.connect("http://localhost:3001"); // connects this to the backend
+const socket = io.connect("http://localhost:3000"); // connects this to the backend
 
 function App() {
   const [username, setUsername] = useState(""); // useState keeps track of the updated state of the variable
