@@ -14,7 +14,7 @@ const io = new Server(server, {
   },
 });
 
-io.on("connection", (socket) => { // whenever a connection to the serve is detected, grabs 'socket' or the information of the connection 
+io.on("connection", (socket) => { // whenever a connection to the serve is detected, grabs 'socket' or the information of the connection
   (async () => { try { await createTable() } catch (error) { } })();
   console.log(`User connected: ${socket.id}`); // every connection is given a unique id
   //               like f-strings but in js...
@@ -27,9 +27,8 @@ io.on("connection", (socket) => { // whenever a connection to the serve is detec
         const in_room = await get_roles_in_room(room);
         if (in_room.length < 5) {
           socket.emit("do_not_join", false);
-          await add_to_room(socket.id, room, await pick_role(await get_roles_in_room(room)), socket);
-          await add_to_users(socket.id, room, username);
-          socket.join(room); // adds you to an arbitrary room; you can now emit messages to everyone in that room at once (like clumping...) (https://socket.io/docs/v3/rooms/) 
+          await add_to_room(socket.id, room, await pick_role(await get_roles_in_room(room)), username, socket);
+          socket.join(room); // adds you to an arbitrary room; you can now emit messages to everyone in that room at once (like clumping...) (https://socket.io/docs/v3/rooms/)
           console.log(`User with ID: ${socket.id} joined room: ${room}`);
         }
         else {
@@ -90,8 +89,7 @@ function createTable() {
   const db = connect();
   return new Promise((resolve, reject) => {
     const tables = `
-      CREATE TABLE IF NOT EXISTS rooms(user_id TEXT, room_id TEXT, role TEXT);
-      CREATE TABLE IF NOT EXISTS users(user_id TEXT, room_id TEXT, username TEXT);
+      CREATE TABLE IF NOT EXISTS rooms(user_id TEXT, room_id TEXT, role TEXT, username TEXT);
     `;
     db.run(tables, (err) => {
       if (err) {
@@ -117,10 +115,10 @@ function pick_role(in_room) {
   return only_consider[Math.floor(Math.random() * only_consider.length)];
 }
 
-function add_to_room(user_id, room_id, role, socket) {
+function add_to_room(user_id, room_id, role, username, socket) {
   const db = connect();
   return new Promise((resolve, reject) => {
-    db.run("INSERT INTO rooms (user_id, room_id, role) VALUES (?, ?, ?)", [user_id, room_id, role], (err) => {
+    db.run("INSERT INTO rooms (user_id, room_id, role, username) VALUES (?, ?, ?, ?)", [user_id, room_id, role, username], (err) => {
       if (err) {
         console.log(err.message);
         reject(err);
@@ -162,30 +160,16 @@ function remove_from_room(user_id) {
   });
 }
 
-function add_to_users(user_id, room_id, username) {
-  const db = connect();
-  return new Promise((resolve, reject) => {
-    db.run("INSERT INTO users (user_id, room_id, username) VALUES (?, ?, ?)", [user_id, room_id, username], (err) => {
-      if (err) {
-        console.log(err.message);
-        reject(err);
-      }
-      resolve(console.log(`Inserted ${user_id} into users ${room_id} as ${username}`));
-    });
-    close(db);
-  });
-}
-
 function get_users_in_room(room) {
   const db = connect();
   return new Promise((resolve, reject) => {
-    db.all("SELECT username FROM users WHERE room_id = ?", [room], (err, rows) => {
+    db.all("SELECT username FROM rooms WHERE room_id = ?", [room], (err, rows) => {
       if (err) {
         console.log(err.message);
         reject(err);
       }
       const ret = []
-      rows.forEach(value => ret.push(value.role));
+      rows.forEach(value => ret.push(value.username));
       resolve(ret);
     });
     close(db);
