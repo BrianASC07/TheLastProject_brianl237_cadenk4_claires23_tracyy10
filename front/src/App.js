@@ -15,7 +15,6 @@ function App() {
   const joinRoom = () => {
     if (username !== "" && room !== "") { // requirements to join
       socket.emit("join_room", [room, username]) // calls join_room in backend and passes the room id
-      setShowChat(true);
     }
   };
 
