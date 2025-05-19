@@ -19,3 +19,7 @@ tracyY -- 2025-5-9 X:XX
 tracyY --2025-5-15 X:XX
 - database for storing roles, user_id, room is functional and in place
 - cannot join room if room capacity is full
+
+cadenK --2025-5-15 11:00
+- Fixed the Node backend to be able to serve the multiplayer game on the page
+- Created an aesthetically pleasing frontend and added pages like login and homepage
