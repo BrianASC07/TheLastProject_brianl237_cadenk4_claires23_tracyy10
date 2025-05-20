@@ -1,60 +1,107 @@
-import './App.css';
-import { Chat } from './Chat.js';
-import io from 'socket.io-client'; // front end must be started ('npm start') !!!
-import { useState } from "react";
-import { Night } from './Night.js';
+import React, { useState } from "react";
 
-const socket = io.connect("http://localhost:3001"); // connects this to the backend
+export function Night({ socket, username, room, role }) {
+  const [userList, setUserList] = useState([]);
+  const [target, setTarget] = useState("");
+  const [checkRole, setCheckRole] = useState(false);
+  const [roleDescription, setRoleDescription] = useState("");
 
-function App() {
-  const [username, setUsername] = useState(""); // useState keeps track of the updated state of the variable
-  const [room, setRoom] = useState(""); // ref below...
-  const [showChat, setShowChat] = useState(false);
-  const [role, setRole] = useState("");
-
-  const joinRoom = () => {
-    if (username !== "" && room !== "") { // requirements to join
-      socket.emit("join_room", [room, username]) // calls join_room in backend and passes the room id
-      // setShowChat(true);
-    }
+  const options = async () => {
+    await socket.emit("request_userList", room);
   };
 
-  socket.on("do_not_join", (data) => {
-    if (data === false) setShowChat(true);
-  });
+  const message = () => {
+    if (target !== "") {
+      if (role === "mafia") {
+        return <p> You have selected {target} to kill. </p>
+      }
+      if (role === "doctor") {
+        return <p> You have selected {target} to protect. </p>
+      }
+      else {
+        return <p> You have selected {target} to investigate. </p>
+      }
+    }
+    else {
+      return <p> You are thinking of who to select... </p>
+    }
+  }
 
-  socket.on("set_role", (data) => {
-    setRole(data);
-  });
+  function description(role) {
+    setCheckRole(true);
+    if (role === "mafia") {
+      setRoleDescription("The mafia is the evil guy, blah blah blah, kill someone each night...");
+    }
+    else if (role === "doctor") {
+      setRoleDescription("The doctor is a pretty cool role, blah blah blah, grant invincibility to a person for a night...");
+    }
+    else if (role === "cop") {
+      setRoleDescription("The cop is cool i guess, blah blah blah, select someone to investigate each night to learn their role in the morning...");
+    }
+    else {
+      setRoleDescription("The innocent is a basic role... you have no special role at night. Fear not because there is power in numbers, pay attention to the others' behaviour and vote to condemn the suspicious in the morning!");
+    }
+  }
 
-  return (
-    <div className="App">
-      {!showChat ? ( // if showChat is false, allow to join
-        <div className="joinChatContainer">
-          <h3> join chat </h3>
-          <input
-            type="text"
-            placeholder="Name..."
-            onChange={(event) => // takes in the event (the inputted text)
-            {
-              setUsername(event.target.value); // updates the variable setUsername with input
-            }}
-          />
-          <input
-            type="text"
-            placeholder="Room ID..."
-            onChange={(event) => {
-              setRoom(event.target.value);
-            }}
-          />
-          <button onClick={joinRoom}> join room </button>
+  const constant = () => {
+    return (
+      <div>
+        <div /* top */>
+          <p> You are the </p>
+          <p> { role } </p>
+          {["mafia", "doctor", "cop", "innocent"].map((role, index) => {
+            return <button onClick={ () => description(role) }> {role} </button>
+          })}
+          { checkRole ? (
+            <div>
+              <p> {roleDescription} </p>
+              <button onClick={ () => setCheckRole(false) }> x </button>
+            </div>
+          ):(
+            ""
+          )}
+          <p> Time left : </p>
+          {/* add in time logic */}
+          <p> *** Narration here  *** </p>
+          {/* add in narration logic */}
         </div>
-      ) : ( // else show the chat
-        // <Chat socket={socket} username={username} room={room} />
-        <Night socket={ socket } username={ username } room={ room } role={ role } />
-      )}
-    </div>
-  );
-}
+        <div /* side */>
+          <p> Alive : </p>
+          {userList.map((username, index) => {
+            return <p>{username}</p>
+          })}
+          <p> Spectating : </p>
+          {/* add in spectator logic */}
+        </div>
+      </div>
+    )
+  }
 
-export default App;
+  socket.on("user_list", (data) => {
+    setUserList(data);
+  });
+
+  options();
+  if (["mafia", "doctor", "cop"].includes(role)) {
+    return ( // if special role
+      <div>
+        { constant() }
+        <p> Select a target: </p>
+        {userList.map((uname, index) => {
+          if (username !== uname || role === "doctor") {
+            return <button onClick={() => setTarget(uname)}> {uname} </button>
+          }
+          else { return "" }
+        })}
+        { message() }
+      </div>
+    );
+  }
+  else {
+    return ( // innocent
+      <div>
+        { constant() }
+      </div>
+    );
+  }
+}
