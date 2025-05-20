@@ -42,3 +42,5 @@ $ cd git@github.com:BrianASC07/TheLastProject_brianl237_cadenk4_claires23_tracyy
 $ npm start
 ```
 3. Navigate to localhost: http://localhost:3000/
+
+Alternately, you can navigate to http://68.183.119.58/
