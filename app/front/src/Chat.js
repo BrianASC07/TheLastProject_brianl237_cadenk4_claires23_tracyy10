@@ -16,7 +16,6 @@ export function Chat({ socket, username, room }) {
 
             await socket.emit("send_message", messageData); // calls send_message on backend and sends the mesage object
             setMessageList((list) => [...list, messageData]); // adds your own message to the list
-            console.log(messageList);
             setCurrentMessage(""); // resets your typie bar to nada
         }
     };
