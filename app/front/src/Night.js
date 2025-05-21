@@ -1,10 +1,42 @@
-import React, { useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
+import { Chat } from './Chat.js';
 
 export function Night({ socket, username, room, role }) {
   const [userList, setUserList] = useState([]);
   const [target, setTarget] = useState("");
   const [checkRole, setCheckRole] = useState(false);
   const [roleDescription, setRoleDescription] = useState("");
+  const [seconds, setSeconds] = useState(60000); // 1000 ms -> s
+
+  function end_night() {
+    return <Chat socket={socket} username={username} room={room} />
+  }
+
+  const interval = useRef(null); // https://react.dev/reference/react/useRef
+  useEffect(() => {
+    // setInterval(() => { setSeconds(seconds - 1000); }, 1000);
+    interval.current = setInterval(() => { setSeconds(seconds - 1000); }, 1000);
+    clearInterval(interval);
+  }, []);
+
+  const [count, setCount] = useState(0);
+  const intervalRef = useRef(null);
+
+  useEffect(() => {
+    intervalRef.current = setInterval(() => {
+      setCount(prevCount => prevCount + 1);
+    }, 1000);
+
+    return () => {
+      clearInterval(intervalRef.current);
+    };
+  }, []); // Empty dependency array ensures the effect runs only once
+
+
+
+
+
+
 
   const options = async () => {
     await socket.emit("request_userList", room);
@@ -48,20 +80,20 @@ export function Night({ socket, username, room, role }) {
       <div>
         <div /* top */>
           <p> You are the </p>
-          <p> { role } </p>
+          <p> {role} </p>
           {["mafia", "doctor", "cop", "innocent"].map((role, index) => {
-            return <button onClick={ () => description(role) }> {role} </button>
+            return <button onClick={() => description(role)}> {role} </button>
           })}
-          { checkRole ? (
+          {checkRole ? (
             <div>
               <p> {roleDescription} </p>
-              <button onClick={ () => setCheckRole(false) }> x </button>
+              <button onClick={() => setCheckRole(false)}> x </button>
             </div>
-          ):(
+          ) : (
             ""
           )}
           <p> Time left : </p>
-          {/* add in time logic */}
+          {seconds / 1000} {count}
           <p> *** Narration here  *** </p>
           {/* add in narration logic */}
         </div>
@@ -85,7 +117,7 @@ export function Night({ socket, username, room, role }) {
   if (["mafia", "doctor", "cop"].includes(role)) {
     return ( // if special role
       <div>
-        { constant() }
+        {constant()}
         <p> Select a target: </p>
         {userList.map((uname, index) => {
           if (username !== uname || role === "doctor") {
@@ -93,14 +125,14 @@ export function Night({ socket, username, room, role }) {
           }
           else { return "" }
         })}
-        { message() }
+        {message()}
       </div>
     );
   }
   else {
     return ( // innocent
       <div>
-        { constant() }
+        {constant()}
       </div>
     );
   }
