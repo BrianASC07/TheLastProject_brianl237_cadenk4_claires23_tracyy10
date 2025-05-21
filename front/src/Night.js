@@ -6,37 +6,38 @@ export function Night({ socket, username, room, role }) {
   const [target, setTarget] = useState("");
   const [checkRole, setCheckRole] = useState(false);
   const [roleDescription, setRoleDescription] = useState("");
-  const [seconds, setSeconds] = useState(60000); // 1000 ms -> s
+  const [seconds, setSeconds] = useState(60);
 
   function end_night() {
     return <Chat socket={socket} username={username} room={room} />
   }
 
-  const interval = useRef(null); // https://react.dev/reference/react/useRef
-  useEffect(() => {
-    // setInterval(() => { setSeconds(seconds - 1000); }, 1000);
-    interval.current = setInterval(() => { setSeconds(seconds - 1000); }, 1000);
-    clearInterval(interval);
-  }, []);
+    // Summary: useRef creates an object that can be changed independantly from react's normal refreshes
+    //    const ref = useRef( initialValue )
+    //    the initialValue sets what ref.current will equate to initially. the argument will be ignored afterwards
+    //    useRef creates an OBJECT with the property "current"
 
-  const [count, setCount] = useState(0);
-  const intervalRef = useRef(null);
+    // const ref = useRef(null);
+    // useEffect(() => {
+    //   return () => {
+    //     ref.current = setInterval(() => {
+    //       setSeconds(prevSeconds => prevSeconds-1);
+    //     }, 1000);
+    //   }
+    // }, []);
 
-  useEffect(() => {
-    intervalRef.current = setInterval(() => {
-      setCount(prevCount => prevCount + 1);
-    }, 1000);
+    // https://react.dev/learn/synchronizing-with-effects#how-to-handle-the-effect-firing-twice-in-development
+    // because of how useEffect runs their 'setup' code and 'cleanup' code, effects "running twice" often occur
+    // to fix, add the 'cleanup' code which undos the 'setup' code (first instance of running is for bug catching)
+    // in this case, i just put everything inside the 'cleanup' code, which idk if its good practice? but it worked :D
 
+  useEffect(() => { // timer ticks down every second
     return () => {
-      clearInterval(intervalRef.current);
-    };
-  }, []); // Empty dependency array ensures the effect runs only once
-
-
-
-
-
-
+      setInterval(() => {
+        setSeconds(prevSeconds => prevSeconds-1);
+      }, 1000); // 1000 ms -> s
+    }
+  }, []);
 
   const options = async () => {
     await socket.emit("request_userList", room);
@@ -93,7 +94,7 @@ export function Night({ socket, username, room, role }) {
             ""
           )}
           <p> Time left : </p>
-          {seconds / 1000} {count}
+          {seconds}
           <p> *** Narration here  *** </p>
           {/* add in narration logic */}
         </div>
