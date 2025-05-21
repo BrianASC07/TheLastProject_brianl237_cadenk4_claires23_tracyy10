@@ -8,24 +8,6 @@ export function Night({ socket, username, room, role }) {
   const [roleDescription, setRoleDescription] = useState("");
   const [seconds, setSeconds] = useState(60);
 
-  function end_night() {
-    return <Chat socket={socket} username={username} room={room} />
-  }
-
-    // Summary: useRef creates an object that can be changed independantly from react's normal refreshes
-    //    const ref = useRef( initialValue )
-    //    the initialValue sets what ref.current will equate to initially. the argument will be ignored afterwards
-    //    useRef creates an OBJECT with the property "current"
-
-    // const ref = useRef(null);
-    // useEffect(() => {
-    //   return () => {
-    //     ref.current = setInterval(() => {
-    //       setSeconds(prevSeconds => prevSeconds-1);
-    //     }, 1000);
-    //   }
-    // }, []);
-
     // https://react.dev/learn/synchronizing-with-effects#how-to-handle-the-effect-firing-twice-in-development
     // because of how useEffect runs their 'setup' code and 'cleanup' code, effects "running twice" often occur
     // to fix, add the 'cleanup' code which undos the 'setup' code (first instance of running is for bug catching)
@@ -38,6 +20,10 @@ export function Night({ socket, username, room, role }) {
       }, 1000); // 1000 ms -> s
     }
   }, []);
+
+  if (seconds <= 0) { // ends the night
+    return <Chat socket={socket} username={username} room={room} />
+  }
 
   const options = async () => {
     await socket.emit("request_userList", room);
