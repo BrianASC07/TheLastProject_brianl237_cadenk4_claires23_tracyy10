@@ -31,3 +31,7 @@ tracyY --2025-5-20 4:58
 - made the constant display components
 - added in selecting targets for special roles
 - finished night display
+
+tracyY --2025-5-21 11:19
+- finished adding the timer
+- when night finished, now routes to chat
