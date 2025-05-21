@@ -17,6 +17,7 @@ export function Chat({ socket, username, room }) {
             await socket.emit("send_message", messageData); // calls send_message on backend and sends the mesage object
             setMessageList((list) => [...list, messageData]); // adds your own message to the list
             setCurrentMessage(""); // resets your typie bar to nada
+            console.log(messageList);
         }
     };
 
@@ -24,6 +25,7 @@ export function Chat({ socket, username, room }) {
         socket.off("receive_message").on("receive_message", (data) => { // the change will be when 'receive_message' is called
             // socket.off once bc it was sending twice (prevents that instance from running)
             setMessageList((list) => [...list, data]); // appends data (new message) to the current messageList
+            console.log("asdfasdfla");
         });
     }, [socket]);
 

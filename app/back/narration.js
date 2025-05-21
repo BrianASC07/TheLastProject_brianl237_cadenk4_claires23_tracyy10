@@ -8,21 +8,21 @@ const background = [
 const action = [
   " fell onto someone's upturned rake",
   " tripped over someone's pet rock",
-  " fell into a 6-foot pit that someone dug in the grass", 
+  " fell into a 6-foot pit that someone dug in the grass",
   " slipped on someone's banana peel",
   " got attacked by someone's lawn mower",
   " got run over by a motorcycle"
 ]
 
 const result = [
-  " and was left to marinate in their big pool of blood",
-  " and slowly faded into nothingness",
-  " and never got up again"
+  " and was left to marinate in their big pool of blood.",
+  " and slowly faded into nothingness.",
+  " and never got up again."
 ]
 
 const saved = [
-  ", but then someone pushed them out of the way at the last second, saving their life.", 
-  ', but then someone screamed "WATCH OUT!!!" just in time to save their life.', 
+  ", but then someone pushed them out of the way at the last second, saving their life.",
+  ', but then someone screamed "WATCH OUT!!!" just in time to save their life.',
   ", but then someone called their name, causing them to turn in the opposite direction and saving their life."
 ]
 
@@ -42,3 +42,5 @@ function script(user, death) {
   }
   return res;
 }
+
+console.log(script("abc", false));
