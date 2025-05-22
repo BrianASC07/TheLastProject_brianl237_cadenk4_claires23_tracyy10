@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import {script} from './narration.js';
 
 export function Night({ socket, username, room, role }) {
   const [userList, setUserList] = useState([]);
@@ -63,7 +64,7 @@ export function Night({ socket, username, room, role }) {
           <p> Time left : </p>
           {/* add in time logic */}
           <p> *** Narration here  *** </p>
-          {/* add in narration logic */}
+          {script(username, true)} {/*cop(target, target_role)*/}
         </div>
         <div /* side */>
           <p> Alive : </p>
