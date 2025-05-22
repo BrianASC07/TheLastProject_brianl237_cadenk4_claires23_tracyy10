@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import { Chat } from './Chat.js';
 
 export function Night({ socket, username, room, role }) {
@@ -6,7 +6,8 @@ export function Night({ socket, username, room, role }) {
   const [target, setTarget] = useState("");
   const [checkRole, setCheckRole] = useState(false);
   const [roleDescription, setRoleDescription] = useState("");
-  const [seconds, setSeconds] = useState(60);
+  const [seconds, setSeconds] = useState(20);
+  const [actOnce, setActOnce] = useState(true);
 
     // https://react.dev/learn/synchronizing-with-effects#how-to-handle-the-effect-firing-twice-in-development
     // because of how useEffect runs their 'setup' code and 'cleanup' code, effects "running twice" often occur
@@ -21,13 +22,45 @@ export function Night({ socket, username, room, role }) {
     }
   }, []);
 
-  if (seconds <= 0) { // ends the night
+  // const save = async() => {
+  //   await socket.emit("update_save", target);
+  // };
+
+  const save= () => {
+    if (actOnce) {
+      socket.emit("update_save", target);
+    }
+    setActOnce(false);
+  }
+
+  const kill = async() => { // removes the target from socket room and database
+    if (actOnce) {
+      await socket.emit("force_disconnect", [target, room]);
+      setActOnce(false);
+    }
+  };
+
+  if (seconds <= 0) { // ends the night after timer is up
+
+    if (role === "doctor" && target !== "") {
+      save();
+    }
+    if (role === "mafia" && target !== "") {
+      kill();
+    }
+    if (role === "cop" && target !== "") {
+      //
+    }
     return <Chat socket={socket} username={username} room={room} />
   }
 
   const options = async () => {
     await socket.emit("request_userList", room);
   };
+
+  socket.on("user_list", (data) => {
+    setUserList(data);
+  });
 
   const message = () => {
     if (target !== "") {
@@ -95,10 +128,6 @@ export function Night({ socket, username, room, role }) {
       </div>
     )
   }
-
-  socket.on("user_list", (data) => {
-    setUserList(data);
-  });
 
   options();
   if (["mafia", "doctor", "cop"].includes(role)) {

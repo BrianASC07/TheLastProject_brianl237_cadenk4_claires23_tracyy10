@@ -4,24 +4,24 @@ import io from 'socket.io-client'; // front end must be started ('npm start') !!
 import { useState } from "react";
 import { Night } from './Night.js';
 
-// const socket = io.connect("http://localhost:3001"); // connects this to the backend
-const socket = io.connect("http://localhost:3000");
+const socket = io.connect("http://localhost:3001"); // connects this to the backend
+// const socket = io.connect("http://localhost:3000");
 
-function App() {
+export function App() {
   const [username, setUsername] = useState(""); // useState keeps track of the updated state of the variable
   const [room, setRoom] = useState(""); // ref below...
-  const [showChat, setShowChat] = useState(false);
+  const [showNight, setshowNight] = useState(false);
   const [role, setRole] = useState("");
 
   const joinRoom = () => {
     if (username !== "" && room !== "") { // requirements to join
       socket.emit("join_room", [room, username]) // calls join_room in backend and passes the room id
-      setShowChat(true);
+      // setshowNight(true);
     }
   };
 
   socket.on("do_not_join", (data) => {
-    if (data === false) setShowChat(true);
+    if (data === false) setshowNight(true);
   });
 
   socket.on("set_role", (data) => {
@@ -30,9 +30,9 @@ function App() {
 
   return (
     <div className="App">
-      {!showChat ? ( // if showChat is false, allow to join
+      {!showNight ? ( // if showNight is false, allow to join
         <div className="joinChatContainer">
-          <h3> join chat </h3>
+          <h3> Join Room </h3>
           <input
             type="text"
             placeholder="Name..."
@@ -40,6 +40,7 @@ function App() {
             {
               setUsername(event.target.value); // updates the variable setUsername with input
             }}
+            onKeyPress={(event) => { event.key === 'Enter' && joinRoom(); }}
           />
           <input
             type="text"
@@ -47,11 +48,11 @@ function App() {
             onChange={(event) => {
               setRoom(event.target.value);
             }}
+            onKeyPress={(event) => { event.key === 'Enter' && joinRoom(); }}
           />
-          <button onClick={joinRoom}> join room </button>
+          <button onClick={joinRoom}> connect </button>
         </div>
-      ) : ( // else show the chat
-        // <Chat socket={socket} username={username} room={room} />
+      ) : ( // else enter night
         <Night socket={ socket } username={ username } room={ room } role={ role } />
       )}
     </div>
