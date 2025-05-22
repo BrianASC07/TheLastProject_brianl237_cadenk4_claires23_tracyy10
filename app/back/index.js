@@ -6,6 +6,8 @@ const { Server } = require("socket.io");
 const sqlite3 = require("sqlite3");
 app.use(cors());
 
+let save_record = "";
+
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: { // cors configures socket.io to prevent errors later on...
@@ -50,6 +52,27 @@ io.on("connection", (socket) => { // whenever a connection to the serve is detec
         socket.emit("user_list", await get_users_in_room(data));
       } catch (error) {}
     })();
+  });
+
+  socket.on("update_save", (data) => {
+    console.log("PRE SVAE CHANGE : " + save_record);
+    save_record = data;
+    console.log("POST SVAE CHANGE : " + save_record);
+  });
+
+  socket.on("force_disconnect", (data) => {
+    console.log("POST SVAE CHANGE DATA : " + data[0]);
+    console.log("COMPARE SVAE CHANGE : " + save_record);
+    if (data[0] !== save_record) {
+      (async() => {
+      try {
+        const userID = await get_user_id(data[0], data[1]);
+        await remove_from_room(userID);
+        io.in(userID).disconnectSockets();
+      } catch (error) {}
+    })();
+    }
+    save_record = "";
   });
 
   socket.on("disconnect", () => {
@@ -139,7 +162,9 @@ function get_roles_in_room(room) { // returns an array of roles in a given room
         reject(err);
       }
       const ret = []
-      rows.forEach(value => ret.push(value.role));
+      if (rows !== undefined) {
+        rows.forEach(value => ret.push(value.role));
+      }
       resolve(ret);
     });
     close(db);
@@ -171,6 +196,20 @@ function get_users_in_room(room) {
       const ret = []
       rows.forEach(value => ret.push(value.username));
       resolve(ret);
+    });
+    close(db);
+  });
+}
+
+function get_user_id(username, room) {
+  const db = connect();
+  return new Promise((resolve, reject) => {
+    db.get("SELECT user_id FROM rooms WHERE username = ? AND room_id = ?", [username, room], (err, rows) => {
+      if (err) {
+        console.log(err.message);
+        reject(err);
+      }
+      resolve(rows.user_id);
     });
     close(db);
   });
