@@ -35,3 +35,7 @@ tracyY --2025-5-20 4:58
 tracyY --2025-5-21 11:19
 - finished adding the timer
 - when night finished, now routes to chat
+
+
+JavaScript style revisions 5/23:
+ - the biggest issue is most likely with the usage of arrow functions instead of function declarations even when they are not necessary, such as in App.js. If time allows, we will likely go through the code and clean up functions as needed
