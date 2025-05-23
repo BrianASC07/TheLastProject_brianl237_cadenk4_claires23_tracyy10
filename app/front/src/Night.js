@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Chat } from './Chat.js';
 
 export function Night({ socket, username, room, role }) {
@@ -6,61 +6,36 @@ export function Night({ socket, username, room, role }) {
   const [target, setTarget] = useState("");
   const [checkRole, setCheckRole] = useState(false);
   const [roleDescription, setRoleDescription] = useState("");
-  const [seconds, setSeconds] = useState(20);
-  const [actOnce, setActOnce] = useState(true);
+  const [seconds, setSeconds] = useState(60000);
+  const [displayRole, setDisplayRole] = useState(role); // New state for displayed role
 
-    // https://react.dev/learn/synchronizing-with-effects#how-to-handle-the-effect-firing-twice-in-development
-    // because of how useEffect runs their 'setup' code and 'cleanup' code, effects "running twice" often occur
-    // to fix, add the 'cleanup' code which undos the 'setup' code (first instance of running is for bug catching)
-    // in this case, i just put everything inside the 'cleanup' code, which idk if its good practice? but it worked :D
 
-  useEffect(() => { // timer ticks down every second
-    return () => {
-      setInterval(() => {
-        setSeconds(prevSeconds => prevSeconds-1);
-      }, 1000); // 1000 ms -> s
-    }
+  function end_night() {
+    return <Chat socket={socket} username={username} room={room} />;
+  }
+
+  const interval = useRef(null);
+  useEffect(() => {
+    interval.current = setInterval(() => { setSeconds(seconds - 1000); }, 1000);
+    clearInterval(interval);
   }, []);
 
-  // const save = async() => {
-  //   await socket.emit("update_save", target);
-  // };
+  const [count, setCount] = useState(0);
+  const intervalRef = useRef(null);
 
-  const save= () => {
-    if (actOnce) {
-      socket.emit("update_save", target);
-    }
-    setActOnce(false);
-  }
+  useEffect(() => {
+    intervalRef.current = setInterval(() => {
+      setCount(prevCount => prevCount + 1);
+    }, 1000);
 
-  const kill = async() => { // removes the target from socket room and database
-    if (actOnce) {
-      await socket.emit("force_disconnect", [target, room]);
-      setActOnce(false);
-    }
-  };
-
-  if (seconds <= 0) { // ends the night after timer is up
-
-    if (role === "doctor" && target !== "") {
-      save();
-    }
-    if (role === "mafia" && target !== "") {
-      kill();
-    }
-    if (role === "cop" && target !== "") {
-      //
-    }
-    return <Chat socket={socket} username={username} room={room} />
-  }
+    return () => {
+      clearInterval(intervalRef.current);
+    };
+  }, []);
 
   const options = async () => {
     await socket.emit("request_userList", room);
   };
-
-  socket.on("user_list", (data) => {
-    setUserList(data);
-  });
 
   const message = () => {
     if (target !== "") {
@@ -97,37 +72,43 @@ export function Night({ socket, username, room, role }) {
 
   const constant = () => {
     return (
-      <div>
-        <div /* top */>
-          <p> You are the </p>
-          <p> {role} </p>
+      <div style={{ padding: "20px", fontFamily: "Arial, sans-serif", display: "flex", flexDirection: "column", alignItems: "center" }}>
+        <div style={{ width: "100%", textAlign: "center", marginBottom: "20px" }}>
+          <p style={{ fontSize: "20px", fontWeight: "bold" }}>You are the {role}</p>
           {["mafia", "doctor", "cop", "innocent"].map((role, index) => {
-            return <button onClick={() => description(role)}> {role} </button>
+            return <button key={index} onClick={() => description(role)} style={buttonStyle}> {role} </button>
           })}
           {checkRole ? (
-            <div>
+            <div style={{ marginTop: "10px", fontSize: "16px", color: "#555", textAlign: "center" }}>
               <p> {roleDescription} </p>
-              <button onClick={() => setCheckRole(false)}> x </button>
+              <button onClick={() => setCheckRole(false)} style={closeButtonStyle}>x</button>
             </div>
           ) : (
             ""
           )}
-          <p> Time left : </p>
-          {seconds}
-          <p> *** Narration here  *** </p>
-          {/* add in narration logic */}
+          <p style={{ fontSize: "18px" }}>Time left: {seconds / 1000} sec</p>
+          <p style={{ fontSize: "18px" }}>Count: {count}</p>
+          <p style={{ marginTop: "20px", fontSize: "18px", fontStyle: "italic" }}>*** Narration here ***</p>
         </div>
-        <div /* side */>
-          <p> Alive : </p>
-          {userList.map((username, index) => {
-            return <p>{username}</p>
-          })}
-          <p> Spectating : </p>
-          {/* add in spectator logic */}
+        <div style={{ width: "100%", display: "flex", justifyContent: "space-around", marginTop: "20px" }}>
+          <div style={{ flex: 1, padding: "10px", borderRight: "1px solid #ccc" }}>
+            <p style={{ fontWeight: "bold" }}>Alive:</p>
+            {userList.map((username, index) => {
+              return <p key={index}>{username}</p>;
+            })}
+          </div>
+          <div style={{ flex: 1, padding: "10px" }}>
+            <p style={{ fontWeight: "bold" }}>Spectating:</p>
+            {/* Add in spectator logic */}
+          </div>
         </div>
       </div>
-    )
-  }
+    );
+  };
+
+  socket.on("user_list", (data) => {
+    setUserList(data);
+  });
 
   options();
   if (["mafia", "doctor", "cop"].includes(role)) {
@@ -137,9 +118,9 @@ export function Night({ socket, username, room, role }) {
         <p> Select a target: </p>
         {userList.map((uname, index) => {
           if (username !== uname || role === "doctor") {
-            return <button onClick={() => setTarget(uname)}> {uname} </button>
+            return <button key={index} onClick={() => setTarget(uname)} style={buttonStyle}> {uname} </button>;
           }
-          else { return "" }
+          return "";
         })}
         {message()}
       </div>
@@ -153,3 +134,27 @@ export function Night({ socket, username, room, role }) {
     );
   }
 }
+
+const buttonStyle = {
+  padding: "8px 16px",
+  fontSize: "14px",
+  margin: "5px",
+  cursor: "pointer",
+  backgroundColor: "#4CAF50",
+  color: "white",
+  border: "none",
+  borderRadius: "4px",
+  transition: "background-color 0.3s ease",
+};
+
+const closeButtonStyle = {
+  padding: "5px 10px",
+  fontSize: "14px",
+  cursor: "pointer",
+  backgroundColor: "#f44336",
+  color: "white",
+  border: "none",
+  borderRadius: "50%",
+  marginLeft: "10px",
+  transition: "background-color 0.3s ease",
+};
