@@ -50,8 +50,8 @@ function App() {
           <button onClick={joinRoom}> join room </button>
         </div>
       ) : ( // else show the chat
-        // <Chat socket={socket} username={username} room={room} />
-        <Night socket={ socket } username={ username } room={ room } role={ role } />
+        <Chat socket={socket} username={username} room={room} />
+        //<Night socket={ socket } username={ username } room={ room } role={ role } />
       )}
     </div>
   );
