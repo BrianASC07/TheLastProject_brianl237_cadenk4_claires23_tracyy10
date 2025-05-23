@@ -114,8 +114,6 @@ export function Night({ socket, username, room, role }) {
           )}
           <p> Time left : </p>
           {seconds}
-          <p> *** Narration here  *** </p>
-          {/* add in narration logic */}
         </div>
         <div /* side */>
           <p> Alive : </p>

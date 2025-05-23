@@ -12,7 +12,7 @@ export function WaitingRoom({ socket, username, room, role }) {
     setUserList(data);
   });
 
-  if (userList.length() === 5) {
+  if (userList.length === 5) {
     return <Night socket={ socket } username={ username } room={ room } role={ role } />
   }
 
