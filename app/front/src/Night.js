@@ -8,6 +8,7 @@ export function Night({ socket, username, room, role }) {
   const [roleDescription, setRoleDescription] = useState("");
   const [seconds, setSeconds] = useState(20);
   const [actOnce, setActOnce] = useState(true);
+  const [displayRole, setDisplayRole] = useState(role); // New state for displayed role
 
     // https://react.dev/learn/synchronizing-with-effects#how-to-handle-the-effect-firing-twice-in-development
     // because of how useEffect runs their 'setup' code and 'cleanup' code, effects "running twice" often occur
@@ -97,33 +98,37 @@ export function Night({ socket, username, room, role }) {
 
   const constant = () => {
     return (
-      <div>
-        <div /* top */>
-          <p> You are the </p>
+      <div style={{ padding: "20px", fontFamily: "Arial, sans-serif", display: "flex", flexDirection: "column", alignItems: "center" }}>
+        <div style={{ width: "100%", textAlign: "center", marginBottom: "20px" }}/* top */>
+          <p style={{ fontSize: "20px", fontWeight: "bold" }}> You are the </p>
           <p> {role} </p>
           {["mafia", "doctor", "cop", "innocent"].map((role, index) => {
-            return <button onClick={() => description(role)}> {role} </button>
+            return <button key={index} onClick={() => description(role)} style={buttonStyle}> {role} </button>
           })}
           {checkRole ? (
-            <div>
+            <div style={{ marginTop: "10px", fontSize: "16px", color: "#555", textAlign: "center" }}>
               <p> {roleDescription} </p>
-              <button onClick={() => setCheckRole(false)}> x </button>
+              <button onClick={() => setCheckRole(false)} style={closeButtonStyle}> x </button>
             </div>
           ) : (
             ""
           )}
-          <p> Time left : </p>
+          <p style={{ fontSize: "18px" }}> Time left : </p>
           {seconds}
-          <p> *** Narration here  *** </p>
+          <p style={{ marginTop: "20px", fontSize: "18px", fontStyle: "italic" }}> *** Narration here  *** </p>
           {/* add in narration logic */}
         </div>
-        <div /* side */>
-          <p> Alive : </p>
-          {userList.map((username, index) => {
-            return <p>{username}</p>
-          })}
-          <p> Spectating : </p>
-          {/* add in spectator logic */}
+        <div style={{ width: "100%", display: "flex", justifyContent: "space-around", marginTop: "20px" }}>
+          <div style={{ flex: 1, padding: "10px", borderRight: "1px solid #ccc" }}>
+            <p style={{ fontWeight: "bold" }}>Alive:</p>
+            {userList.map((username, index) => {
+              return <p key={index}>{username}</p>;
+            })}
+          </div>
+          <div style={{ flex: 1, padding: "10px" }}>
+            <p style={{ fontWeight: "bold" }}>Spectating:</p>
+            {/* Add in spectator logic */}
+          </div>
         </div>
       </div>
     )
@@ -137,7 +142,7 @@ export function Night({ socket, username, room, role }) {
         <p> Select a target: </p>
         {userList.map((uname, index) => {
           if (username !== uname || role === "doctor") {
-            return <button onClick={() => setTarget(uname)}> {uname} </button>
+            return <button key={index} onClick={() => setTarget(uname)} style={buttonStyle}> {uname} </button>
           }
           else { return "" }
         })}
@@ -153,3 +158,27 @@ export function Night({ socket, username, room, role }) {
     );
   }
 }
+
+const buttonStyle = {
+  padding: "8px 16px",
+  fontSize: "14px",
+  margin: "5px",
+  cursor: "pointer",
+  backgroundColor: "#4CAF50",
+  color: "white",
+  border: "none",
+  borderRadius: "4px",
+  transition: "background-color 0.3s ease",
+};
+
+const closeButtonStyle = {
+  padding: "5px 10px",
+  fontSize: "14px",
+  cursor: "pointer",
+  backgroundColor: "#f44336",
+  color: "white",
+  border: "none",
+  borderRadius: "50%",
+  marginLeft: "10px",
+  transition: "background-color 0.3s ease",
+};
