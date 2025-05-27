@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>test</title>
+  <style>
+    #sprite-canvas {
+      background: #222;
+      display: block;
+      margin: 30px auto;
+    }
+    body {
+      background: #151515;
+      color: #eee;
+      font-family: sans-serif;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <input type="file" id="image-upload" accept="image/*">
+  <br>
+  <canvas id="sprite-canvas" width="128" height="64"></canvas>
+  <script>
+    const acr = 4;
+    const d = 2;
+    const totalFrames = acr * d;
+    const frameDelay = 120;
+
+    const canvas = document.getElementById('sprite-canvas');
+    const ctx = canvas.getContext('2d');
+
+    let sprite = null;
+    let frameW = 0, frameH = 0;
+    let currentFrame = 0;
+    let lastFrameTime = 0;
+    let isLoaded = false;
+
+    function drawFrame() {
+      if (!isLoaded || !sprite) return;
+      const row = Math.floor(currentFrame / acr);
+      const col = currentFrame % acr;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(
+        sprite,
+        col * frameW, row * frameH, frameW, frameH,
+        0, 0, canvas.width, canvas.height         
+      );
+    }
+
+    function animate(ts) {
+      if (!lastFrameTime) lastFrameTime = ts;
+      if (ts - lastFrameTime > frameDelay) {
+        currentFrame = (currentFrame + 1) % totalFrames;
+        drawFrame();
+        lastFrameTime = ts;
+      }
+      requestAnimationFrame(animate);
+    }
+
+    document.getElementById('image-upload').addEventListener('change', function(e) {
+      const file = this.files[0];
+      if (!file) return;
+      const img = new Image();
+      img.onload = function() {
+        sprite = img;
+        frameW = img.width / acr;
+        frameH = img.height / d;
+        canvas.width = frameW;
+        canvas.height = frameH;
+        isLoaded = true;
+        currentFrame = 0;
+        lastFrameTime = 0;
+        drawFrame();
+        requestAnimationFrame(animate);
+      }
+      img.src = URL.createObjectURL(file);
+    });
+  </script>
+</body>
+</html>
