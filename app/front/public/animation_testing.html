@@ -7,10 +7,14 @@
 
 <body>
     <canvas id="draw_here" width="1000" height="500" style="border:1px solid #000000;"></canvas>
+    <div>
+        <!--<p id="narration">{{narration}}</p>-->
+        <p id="narration">user was taking a stroll around the neighborhood when they fell onto someone's upturned rake and was left to marinate in their big pool of blood.</p>
+    </div>
     <script>
         var drawing = document.getElementById("draw_here");
         var context = drawing.getContext('2d');
-        
+
         var image = new Image();
         image.src = "./stickman.png";
         image.crossOrigin = true;
@@ -34,7 +38,7 @@
             context.drawImage(image, 0+470*col, 0+400*row, 500, 500, 0, 0, 500, 500);
             col += 1;
         }
-        
+
     </script>
 </body>
 </html>
