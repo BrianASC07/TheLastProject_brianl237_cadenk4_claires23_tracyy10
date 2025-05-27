@@ -2,7 +2,13 @@ const background = [
   " was taking a stroll around the neighborhood",
   " was taking their dog for a walk",
   " was running through a big sunny field",
-  " was doing cartwheels on the grass"
+  " was doing cartwheels on the grass",
+  " was cheerfully frolicking in the park",
+  " was running around their grandmother's huge garden",
+  " was out and about trying to build up their bug collection",
+  " was trying to chase a pretty butterfly",
+  " was trying to choreograph their own interpretive dance in the park",
+  " was walking in the meadow on the hunt for a new pet goat"
 ];
 
 const action = [
@@ -10,18 +16,22 @@ const action = [
   " tripped over someone's pet rock",
   " fell into a 6-foot pit that someone dug in the grass",
   " slipped on someone's banana peel",
-  " got attacked by someone's lawn mower",
-  " got run over by a motorcycle"
+  " tripped over someone's Thomas the Train toy",
+  " tripped over someone's pet duck",
+  " fell onto someone's thorny pet plant",
+  " tripped over someone's empty soda can", 
+  " tripped on someone's jack-o-lantern",
+  " tripped over someone's evil string"
 ]
 
 const result = [
   " and was left to marinate in their big pool of blood.",
-  " and slowly faded into nothingness.",
+  " and hit their head a little too hard. :'(",
   " and never got up again."
 ]
 
 const saved = [
-  ", but then someone pushed them out of the way at the last second, saving their life.",
+  ", but then the scent of someone's freshly baked cookies lured them away at the last second, saving their life.",
   ', but then someone screamed "WATCH OUT!!!" just in time to save their life.',
   ", but then someone called their name, causing them to turn in the opposite direction and saving their life."
 ]
@@ -34,12 +44,12 @@ function randomInt(max) {
 
 export function script(user, death) {
   var res = user;
-  res+=background[randomInt(4)];
+  res+=background[randomInt(10)];
   if (death) {
-    res+=" when they" + action[randomInt(6)];
+    res+=" when they" + action[randomInt(10)];
     res+=result[randomInt(3)];
   } else {
-    res+=" when they almost" + action[randomInt(6)];
+    res+=" when they almost" + action[randomInt(10)];
     res+=saved[randomInt(3)];
   }
   return res;
@@ -47,9 +57,17 @@ export function script(user, death) {
 
 export function suicide(user, death) {
   if (death) {
-    return user + " stuck a fork in an outlet and got electrocuted."
+    return user + " stuck a fork in an outlet and got electrocuted.";
   } else {
-    return user + " tried to jump off a cliff but got saved by someone's sturdy pet bird!"
+    return user + " tried to jump off a cliff but got saved by someone's sturdy pet bird!";
+  }
+}
+
+export function cop(user, mafia) {
+  if (mafia) {
+    return user + " is the mafia!!!";
+  } else {
+    return user + " is not the mafia.";
   }
 }
 
