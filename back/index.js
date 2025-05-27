@@ -6,7 +6,11 @@ const { Server } = require("socket.io");
 const sqlite3 = require("sqlite3");
 app.use(cors());
 
-let save_record = "";
+
+var mafiaSelect = "";
+var doctorSelect = "";
+var copSelect = "";
+
 
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -54,25 +58,41 @@ io.on("connection", (socket) => { // whenever a connection to the serve is detec
     })();
   });
 
-  socket.on("update_save", (data) => {
-    console.log("PRE SVAE CHANGE : " + save_record);
-    save_record = data;
-    console.log("POST SVAE CHANGE : " + save_record);
+  socket.on("set_mafia", (data) => {
+    console.log("mafia selected : " + data);
+    mafiaSelect = (data);
+  });
+
+  socket.on("set_doctor", (data) => {
+    console.log("doctor selected : " + data);
+    doctorSelect = (data);
+  });
+
+  socket.on("set_cop", (data) => {
+    console.log("doctor selected : " + data);
+    copSelect = (data);
+  });
+
+  socket.on("get_mafia", (data) => {
+    socket.emit("recieve_mafia", mafiaSelect);
+  });
+
+  socket.on("get_doctor", (data) => {
+    socket.emit("recieve_doctor", doctorSelect);
+  });
+
+  socket.on("get_cop", (data) => {
+    socket.emit("recieve_cop", copSelect);
   });
 
   socket.on("force_disconnect", (data) => {
-    console.log("POST SVAE CHANGE DATA : " + data[0]);
-    console.log("COMPARE SVAE CHANGE : " + save_record);
-    if (data[0] !== save_record) {
-      (async() => {
+    (async() => {
       try {
         const userID = await get_user_id(data[0], data[1]);
         await remove_from_room(userID);
         io.in(userID).disconnectSockets();
       } catch (error) {}
     })();
-    }
-    save_record = "";
   });
 
   socket.on("disconnect", () => {

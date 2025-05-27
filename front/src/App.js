@@ -2,8 +2,8 @@ import './App.css';
 import { Chat } from './Chat.js';
 import io from 'socket.io-client'; // front end must be started ('npm start') !!!
 import { useState } from "react";
-import { Night } from './Night.js';
 import { WaitingRoom } from './WaitingRoom.js';
+import { Night } from './Night.js';
 
 const socket = io.connect("http://localhost:3001"); // connects this to the backend
 

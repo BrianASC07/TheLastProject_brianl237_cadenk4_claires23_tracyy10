@@ -18,6 +18,9 @@ export function WaitingRoom({ socket, username, room, role }) {
 
   options();
   return (
-    <div> cats over cows </div>
+    <div>
+      <p> cats over cows </p>
+      <p> waiting room </p>
+    </div>
   )
 }
