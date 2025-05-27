@@ -4,6 +4,12 @@ brianL, cadenK, claireS, tracyY -- 2025-5-6 22:30
 tracyY -- 2025-5-5 X:XX
 - started chat in branch: tye
 
+claireS -- 2025-5-5 9:00
+- started db functions
+
+claireS -- 2025-5-6 8:00
+- tested exporting db functions
+
 brianL -- 2025-5-8 9:40
 - Revised design doc.
 - make the purposes of the database tables more clear
@@ -27,7 +33,26 @@ cadenK --2025-5-15 11:00
 tracyY --2025-5-19 X:XX
 - added logic to grab/emit information from/to backend in night
 
+claireS -- 2025-5-19 11:00
+- started background & actions for narration
+
 tracyY --2025-5-20 4:58
 - made the constant display components
 - added in selecting targets for special roles
 - finished night display
+
+claireS -- 2025-05-21
+- finished narration
+
+tracyY --2025-5-21 11:19
+- finished adding the timer
+- when night finished, now routes to chat
+
+cadenK --2025-5-22 11:00
+- Fixed and improved on the waiting room page
+
+claireS -- 2025-05-26 1:00
+- Starter code for animations
+
+JavaScript style revisions 5/23:
+ - the biggest issue is most likely with the usage of arrow functions instead of function declarations even when they are not necessary, such as in App.js. If time allows, we will likely go through the code and clean up functions as needed
