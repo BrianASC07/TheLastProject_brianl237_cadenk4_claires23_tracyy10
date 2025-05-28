@@ -58,5 +58,11 @@ tracyY --2025-05-28 5:03
 - added waiting room
 - added role effects on dawn page
 
+tracyY --2025-05-28 11:45
+- doctor role works
+- mafia role works
+- the mafia can now commit suicide :D
+- night cycle loops properly with dawn
+
 JavaScript style revisions 5/23:
  - the biggest issue is most likely with the usage of arrow functions instead of function declarations even when they are not necessary, such as in App.js. If time allows, we will likely go through the code and clean up functions as needed
