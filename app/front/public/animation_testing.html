@@ -16,13 +16,13 @@
         var context = drawing.getContext('2d');
 
         var image = new Image();
-        image.src = "./stickman.png";
+        image.src = "./walking.png";
         image.crossOrigin = true;
         var intervalID = null;
         var row = 0;
         var col = 0;
         image.onload = function () {
-            intervalID = setInterval(animate, 2000);
+            intervalID = setInterval(animate, 1000);
             //context.drawImage(image, 1, 1, 400, 400, 0, 0, 500, 500);
         }
 
@@ -31,11 +31,11 @@
                 col = 0;
                 row += 1;
             }
-            if (row === 1 && col === 3) {
+            if (row === 4 && col === 3) {
                 clearInterval(intervalID);
             }
-
-            context.drawImage(image, 0+470*col, 0+400*row, 500, 500, 0, 0, 500, 500);
+            context.clearRect(0, 0, 500, 500);
+            context.drawImage(image, 0+480*col, 0+480*row, 480, 480, 0, 0, 500, 500);
             col += 1;
         }
 
