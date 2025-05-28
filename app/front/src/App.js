@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Night } from './Night.js';
 
 const socket = io.connect("http://localhost:3001"); // connects this to the backend
-// const socket = io.connect("http://localhost:3000");
+//const socket = io.connect("http://localhost:3000");
 
 export function App() {
   const [username, setUsername] = useState(""); // useState keeps track of the updated state of the variable
@@ -16,7 +16,7 @@ export function App() {
   const joinRoom = () => {
     if (username !== "" && room !== "") { // requirements to join
       socket.emit("join_room", [room, username]) // calls join_room in backend and passes the room id
-      // setshowNight(true);
+      //setshowNight(true);
     }
   };
 
