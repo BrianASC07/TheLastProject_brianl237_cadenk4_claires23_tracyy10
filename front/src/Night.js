@@ -87,7 +87,7 @@ export function Night({ socket, username, room, role, spectator }) {
     }
   }
 
-  const constant = () => {
+  export const constant = () => {
     return (
       <div>
         <div /* top */>

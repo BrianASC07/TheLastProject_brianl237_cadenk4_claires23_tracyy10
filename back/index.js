@@ -119,6 +119,14 @@ io.on("connection", (socket) => { // whenever a connection to the serve is detec
     })();
   });
 
+  socket.on("get_role", (data) => {
+    (async() => {
+      try {
+        socket.emit("return_role", await get_role(data[0], data[1]));
+      } catch (error) {}
+    })();
+  });
+
   socket.on("disconnect", () => {
     (async () => { try { await remove_from_room(socket.id) } catch (error) { } })();
     console.log("User disconnected: ", socket.id) // listens to disconnects from the server
@@ -304,4 +312,18 @@ function set_spectator(username, room) {
     close(db);
   });
 
+}
+
+function get_role(username, room) {
+  const db = connect();
+  return new Promise((resolve, reject) => {
+    db.get("SELECT role FROM rooms WHERE username = ? AND room_id = ?", [username, room], (err, rows) => {
+      if (err) {
+        console.log(err.message);
+        reject(err);
+      }
+      resolve(rows.role);
+    });
+    close(db);
+  });
 }

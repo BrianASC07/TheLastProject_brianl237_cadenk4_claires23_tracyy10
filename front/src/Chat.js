@@ -1,11 +1,25 @@
 import React, { useEffect, useState } from "react";
+import { Night, constant } from './Night.js';
 
 export function Chat({ socket, username, room, role, spectator}) {
     const [currentMessage, setCurrentMessage] = useState(""); // use setCurrentMessage to update var currentMessage
     const [messageList, setMessageList] = useState([]);
+    const [seconds, setSeconds] = useState(10);
+
+      useEffect(() => { // timer ticks down every second
+        return () => {
+          setInterval(() => {
+            setSeconds(prevSeconds => prevSeconds-1);
+          }, 1000); // 1000 ms -> s
+        }
+      }, []);
+
+      if (seconds <= 0) { // ends the night after timer is up
+        return <Night socket={socket} username={username} room={room} role={role} spectator={isSpectator}/>
+      }
 
     const sendMessage = async () => { // ASYNC causes this function to wait for the AWAIT statement to be finished (a new message is sent) before it runs (otherwise the data required to complete this func would be missing)
-        if (currentMessage !== "") { // cannot send empty messages
+        if (currentMessage !== "" && spectator === false) { // cannot send empty messages
             const messageData = { // create a message object to emit
                 room: room,
                 author: username,
@@ -28,6 +42,8 @@ export function Chat({ socket, username, room, role, spectator}) {
     }, [socket]);
 
     return (
+      <div>
+        { constant() }
         <div className="chat-window">
             <div className="chat-header">
                 <p> chat header!!! </p>
@@ -63,6 +79,7 @@ export function Chat({ socket, username, room, role, spectator}) {
                 {/* upon clicking, calls sendMessage */}
             </div>
         </div>
+      </div>
     );
 }
 
