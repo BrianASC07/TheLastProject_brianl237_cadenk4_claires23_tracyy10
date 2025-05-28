@@ -21,7 +21,7 @@ export function Night({ socket, username, room, role }) {
     }
   }, []);
 
-  const updateSelections = () => {
+   useEffect(() => {
     if (role === 'mafia') {
       socket.emit("set_mafia", target);
     }
@@ -31,7 +31,7 @@ export function Night({ socket, username, room, role }) {
     if (role === 'cop') {
       socket.emit("set_cop", target);
     }
-  }
+    }, [target]);
 
   if (seconds <= 0) { // ends the night after timer is up
     return <Dawn socket={socket} username={username} room={room} />
@@ -111,7 +111,6 @@ export function Night({ socket, username, room, role }) {
   }
 
   options();
-  updateSelections();
   if (["mafia", "doctor", "cop"].includes(role)) {
     return ( // if special role
       <div>

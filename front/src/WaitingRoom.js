@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Night } from './Night.js';
 
 export function WaitingRoom({ socket, username, room, role }) {
@@ -20,7 +20,7 @@ export function WaitingRoom({ socket, username, room, role }) {
   return (
     <div>
       <p> cats over cows </p>
-      <p> waiting room </p>
+      <p> (WAITING ROOM) </p>
     </div>
   )
 }
