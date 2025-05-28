@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Chat } from './Chat.js';
+import { Dawn } from './Dawn.js';
 
 export function Night({ socket, username, room, role }) {
   const [userList, setUserList] = useState([]);
@@ -7,9 +7,7 @@ export function Night({ socket, username, room, role }) {
   const [checkRole, setCheckRole] = useState(false);
   const [roleDescription, setRoleDescription] = useState("");
   const [seconds, setSeconds] = useState(20);
-  const [actOnce, setActOnce] = useState(true);
   const [displayRole, setDisplayRole] = useState(role); // New state for displayed role
-
     // https://react.dev/learn/synchronizing-with-effects#how-to-handle-the-effect-firing-twice-in-development
     // because of how useEffect runs their 'setup' code and 'cleanup' code, effects "running twice" often occur
     // to fix, add the 'cleanup' code which undos the 'setup' code (first instance of running is for bug catching)
@@ -23,36 +21,20 @@ export function Night({ socket, username, room, role }) {
     }
   }, []);
 
-  // const save = async() => {
-  //   await socket.emit("update_save", target);
-  // };
-
-  const save= () => {
-    if (actOnce) {
-      socket.emit("update_save", target);
+   useEffect(() => {
+    if (role === 'mafia') {
+      socket.emit("set_mafia", target);
     }
-    setActOnce(false);
-  }
-
-  const kill = async() => { // removes the target from socket room and database
-    if (actOnce) {
-      await socket.emit("force_disconnect", [target, room]);
-      setActOnce(false);
+    if (role === 'doctor') {
+      socket.emit("set_doctor", target);
     }
-  };
+    if (role === 'cop') {
+      socket.emit("set_cop", target);
+    }
+    }, [target]);
 
   if (seconds <= 0) { // ends the night after timer is up
-
-    if (role === "doctor" && target !== "") {
-      save();
-    }
-    if (role === "mafia" && target !== "") {
-      kill();
-    }
-    if (role === "cop" && target !== "") {
-      //
-    }
-    return <Chat socket={socket} username={username} room={room} />
+    return <Dawn socket={socket} username={username} room={room} />
   }
 
   const options = async () => {
