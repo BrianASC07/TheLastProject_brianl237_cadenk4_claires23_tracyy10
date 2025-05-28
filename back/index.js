@@ -58,6 +58,22 @@ io.on("connection", (socket) => { // whenever a connection to the serve is detec
     })();
   });
 
+  socket.on("request_alive_userList", (data) => {
+    (async () => {
+      try {
+        socket.emit("user_alive_list", await get_alive_users_in_room(data));
+      } catch (error) {}
+    })();
+  });
+
+  socket.on("request_spectating_userList", (data) => {
+    (async () => {
+      try {
+        socket.emit("user_spectating_list", await get_spectating_users_in_room(data));
+      } catch (error) {}
+    })();
+  });
+
   socket.on("set_mafia", (data) => {
     console.log("mafia selected : " + data);
     mafiaSelect = (data);
@@ -91,6 +107,14 @@ io.on("connection", (socket) => { // whenever a connection to the serve is detec
         const userID = await get_user_id(data[0], data[1]);
         await remove_from_room(userID);
         io.in(userID).disconnectSockets();
+      } catch (error) {}
+    })();
+  });
+
+  socket.on("kill_user", (data) => {
+    (async() => {
+      try {
+        await set_spectator(data[0], data[1]);
       } catch (error) {}
     })();
   });
@@ -132,7 +156,7 @@ function createTable() {
   const db = connect();
   return new Promise((resolve, reject) => {
     const tables = `
-      CREATE TABLE IF NOT EXISTS rooms(user_id TEXT, room_id TEXT, role TEXT, username TEXT);
+      CREATE TABLE IF NOT EXISTS rooms(user_id TEXT, room_id TEXT, role TEXT, username TEXT, spectating REAL);
     `;
     db.run(tables, (err) => {
       if (err) {
@@ -161,7 +185,7 @@ function pick_role(in_room) {
 function add_to_room(user_id, room_id, role, username, socket) {
   const db = connect();
   return new Promise((resolve, reject) => {
-    db.run("INSERT INTO rooms (user_id, room_id, role, username) VALUES (?, ?, ?, ?)", [user_id, room_id, role, username], (err) => {
+    db.run("INSERT INTO rooms (user_id, room_id, role, username, spectating) VALUES (?, ?, ?, ?, ?)", [user_id, room_id, role, username, 0], (err) => {
       if (err) {
         console.log(err.message);
         reject(err);
@@ -221,6 +245,38 @@ function get_users_in_room(room) {
   });
 }
 
+function get_alive_users_in_room(room) {
+  const db = connect();
+  return new Promise((resolve, reject) => {
+    db.all("SELECT username FROM rooms WHERE room_id = ? AND spectating = ?", [room, 0], (err, rows) => {
+      if (err) {
+        console.log(err.message);
+        reject(err);
+      }
+      const ret = []
+      rows.forEach(value => ret.push(value.username));
+      resolve(ret);
+    });
+    close(db);
+  });
+}
+
+function get_spectating_users_in_room(room) {
+  const db = connect();
+  return new Promise((resolve, reject) => {
+    db.all("SELECT username FROM rooms WHERE room_id = ? AND spectating = ?", [room, 1], (err, rows) => {
+      if (err) {
+        console.log(err.message);
+        reject(err);
+      }
+      const ret = []
+      rows.forEach(value => ret.push(value.username));
+      resolve(ret);
+    });
+    close(db);
+  });
+}
+
 function get_user_id(username, room) {
   const db = connect();
   return new Promise((resolve, reject) => {
@@ -233,4 +289,19 @@ function get_user_id(username, room) {
     });
     close(db);
   });
+}
+
+function set_spectator(username, room) {
+  const db = connect();
+  return new Promise((resolve, reject) => {
+    db.run("UPDATE rooms SET spectating = 1 WHERE username = ? AND room_id = ?", [username, room], (err, rows) => {
+      if (err) {
+        console.log(err.message);
+        reject(err);
+      }
+      resolve(console.log(`Set ${username} as spectator.`));
+    });
+    close(db);
+  });
+
 }

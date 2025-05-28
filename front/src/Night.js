@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Dawn } from './Dawn.js';
 
-export function Night({ socket, username, room, role }) {
-  const [userList, setUserList] = useState([]);
+export function Night({ socket, username, room, role, spectator }) {
+  const [aliveUserList, setAliveUserList] = useState([]);
+  const [spectatingUserList, setSpectatingUserList] = useState([]);
   const [target, setTarget] = useState("");
   const [checkRole, setCheckRole] = useState(false);
   const [roleDescription, setRoleDescription] = useState("");
@@ -31,18 +32,23 @@ export function Night({ socket, username, room, role }) {
     if (role === 'cop') {
       socket.emit("set_cop", target);
     }
-    }, [target]);
+    }, [role, socket, target]);
 
   if (seconds <= 0) { // ends the night after timer is up
-    return <Dawn socket={socket} username={username} room={room} />
+    return <Dawn socket={socket} username={username} room={room} role={ role } spectator= { spectator }/>
   }
 
   const options = async () => {
-    await socket.emit("request_userList", room);
+    await socket.emit("request_alive_userList", room);
+    await socket.emit("request_spectating_userList", room);
   };
 
-  socket.on("user_list", (data) => {
-    setUserList(data);
+  socket.on("user_alive_list", (data) => {
+    setAliveUserList(data);
+  });
+
+  socket.on("user_spectating_list", (data) => {
+    setSpectatingUserList(data);
   });
 
   const message = () => {
@@ -57,8 +63,11 @@ export function Night({ socket, username, room, role }) {
         return <p> You have selected {target} to investigate. </p>
       }
     }
-    else {
+    else if (spectator === false) {
       return <p> You are thinking of who to select... </p>
+    }
+    else {
+      return "";
     }
   }
 
@@ -100,24 +109,26 @@ export function Night({ socket, username, room, role }) {
         </div>
         <div /* side */>
           <p> Alive : </p>
-          {userList.map((username, index) => {
+          {aliveUserList.map((username, index) => {
             return <p>{username}</p>
           })}
           <p> Spectating : </p>
-          {/* add in spectator logic */}
+          {spectatingUserList.map((username, index) => {
+            return <p>{username}</p>
+          })}
         </div>
       </div>
     )
   }
 
   options();
-  if (["mafia", "doctor", "cop"].includes(role)) {
-    return ( // if special role
+  if (["mafia", "doctor", "cop"].includes(role) && spectator === false) {
+    return ( // if special role AND ALIVE
       <div>
         {constant()}
         <p> Select a target: </p>
-        {userList.map((uname, index) => {
-          if (username !== uname || role === "doctor") {
+        {aliveUserList.map((uname, index) => {
+          if (username !== uname || role === "doctor" || role === "mafia") {
             return <button onClick={() => setTarget(uname)}> {uname} </button>
           }
           else { return "" }
@@ -125,6 +136,15 @@ export function Night({ socket, username, room, role }) {
         {message()}
       </div>
     );
+  }
+  else if (["mafia", "doctor", "cop"].includes(role) && spectator === true) {
+    return (
+      <div>
+        {constant()}
+        <p> You may not act, you are dead. </p>
+        {message()}
+      </div>
+    )
   }
   else {
     return ( // innocent

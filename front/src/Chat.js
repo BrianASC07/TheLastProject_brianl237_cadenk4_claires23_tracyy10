@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-export function Chat({ socket, username, room }) {
+export function Chat({ socket, username, room, role, spectator}) {
     const [currentMessage, setCurrentMessage] = useState(""); // use setCurrentMessage to update var currentMessage
     const [messageList, setMessageList] = useState([]);
 
