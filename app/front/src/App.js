@@ -12,8 +12,10 @@ export function App() {
   const [room, setRoom] = useState(""); // ref below...
   const [showNight, setshowNight] = useState(false);
   const [role, setRole] = useState("");
+  const [roomFull, setRoomFull] = useState(false); // NEW: state for showing if room is full
 
   const joinRoom = () => {
+    setRoomFull(false); // Reset any previous full message
     if (username !== "" && room !== "") { // requirements to join
       socket.emit("join_room", [room, username]) // calls join_room in backend and passes the room id
       //setshowNight(true);
@@ -21,7 +23,12 @@ export function App() {
   };
 
   socket.on("do_not_join", (data) => {
-    if (data === false) setshowNight(true);
+    // If room is full, show message. Otherwise, allow to join.
+    if (data === true) {
+      setRoomFull(true);
+    } else if (data === false) {
+      setshowNight(true);
+    }
   });
 
   socket.on("set_role", (data) => {
@@ -51,6 +58,11 @@ export function App() {
             onKeyPress={(event) => { event.key === 'Enter' && joinRoom(); }}
           />
           <button onClick={joinRoom}> connect </button>
+          {roomFull && (
+            <div style={{ color: 'red', marginTop: '10px' }}>
+              The room is full. Please try a different room!
+            </div>
+          )}
         </div>
       ) : ( // else enter night
         <Night socket={ socket } username={ username } room={ room } role={ role } />
