@@ -27,7 +27,17 @@ $ git clone git@github.com:BrianASC07/TheLastProject_brianl237_cadenk4_claires23
 ```
 $ cd TheLastProject_brianl237_cadenk4_claires23_tracyy10.git/app
 ```
-2. Install required packages
+2. Install required packages in back/
+```
+$ cd TheLastProject_brianl237_cadenk4_claires23_tracyy10/app/back/
+```
+```
+$ npm i
+```
+2. Install required packages in front/
+```
+$ cd TheLastProject_brianl237_cadenk4_claires23_tracyy10/app/front/
+```
 ```
 $ npm i
 ```
@@ -37,10 +47,14 @@ Our project can be launched locally by carrying out the following steps.
 ```
 $ cd git@github.com:BrianASC07/TheLastProject_brianl237_cadenk4_claires23_tracyy10.git/app
 ```
-2. Run the Node app
+2. Navigate to front/
+```
+$ cd TheLastProject_brianl237_cadenk4_claires23_tracyy10/app/front/
+```
+3. Run the Node app
 ```
 $ npm start
 ```
-3. Navigate to localhost: http://localhost:3000/
+4. Navigate to localhost: http://localhost:3000/
 
 Alternately, you can navigate to http://68.183.119.58/
