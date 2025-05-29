@@ -87,7 +87,7 @@ export function Night({ socket, username, room, role, spectator }) {
     }
   }
 
-  export const constant = () => {
+  const constant = () => {
     return (
       <div>
         <div /* top */>
@@ -154,3 +154,5 @@ export function Night({ socket, username, room, role, spectator }) {
     );
   }
 }
+
+export default Night

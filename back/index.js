@@ -293,6 +293,7 @@ function get_user_id(username, room) {
         console.log(err.message);
         reject(err);
       }
+      console.log(rows);
       resolve(rows.user_id);
     });
     close(db);
@@ -322,6 +323,7 @@ function get_role(username, room) {
         console.log(err.message);
         reject(err);
       }
+      console.log(rows);
       resolve(rows.role);
     });
     close(db);
