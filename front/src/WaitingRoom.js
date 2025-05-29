@@ -19,7 +19,6 @@ export function WaitingRoom({ socket, username, room, role, spectator }) {
   options();
   return (
     <div>
-      <p> cats over cows </p>
       <p> (WAITING ROOM) </p>
     </div>
   )

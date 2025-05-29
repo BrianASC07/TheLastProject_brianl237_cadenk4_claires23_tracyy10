@@ -76,17 +76,18 @@ io.on("connection", (socket) => { // whenever a connection to the serve is detec
 
   socket.on("set_mafia", (data) => {
     console.log("mafia selected : " + data);
-    mafiaSelect = (data);
+    mafiaSelect = data;
   });
 
   socket.on("set_doctor", (data) => {
     console.log("doctor selected : " + data);
-    doctorSelect = (data);
+    doctorSelect = data;
   });
 
   socket.on("set_cop", (data) => {
-    console.log("doctor selected : " + data);
-    copSelect = (data);
+    console.log("cop selected : " + data);
+    copSelect = data;
+    console.log(copSelect);
   });
 
   socket.on("get_mafia", (data) => {
@@ -122,6 +123,7 @@ io.on("connection", (socket) => { // whenever a connection to the serve is detec
   socket.on("get_role", (data) => {
     (async() => {
       try {
+        console.log(data);
         socket.emit("return_role", await get_role(data[0], data[1]));
       } catch (error) {}
     })();
@@ -293,7 +295,6 @@ function get_user_id(username, room) {
         console.log(err.message);
         reject(err);
       }
-      console.log(rows);
       resolve(rows.user_id);
     });
     close(db);
@@ -323,7 +324,6 @@ function get_role(username, room) {
         console.log(err.message);
         reject(err);
       }
-      console.log(rows);
       resolve(rows.role);
     });
     close(db);

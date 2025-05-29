@@ -13,7 +13,7 @@ export function Dawn({ socket, username, room, role, spectator }) {
   const [mafiaTarget, setMafiaTarget] = useState("");
   const [doctorTarget, setDoctorTarget] = useState("");
   const [copTarget, setCopTarget] = useState("");
-  const [seconds, setSeconds] = useState(5);
+  const [seconds, setSeconds] = useState(10);
   const [isSpectator, setIsSpectator] = useState(spectator);
   const [copMessage, setCopMessage] = useState("");
 
@@ -46,10 +46,10 @@ export function Dawn({ socket, username, room, role, spectator }) {
     setCopTarget(data);
   });
 
-  if (forCop) { // doesn't need to be in this if-statement, i just don't want it running eternally....
+  if (forCop && copTarget !== "") { // doesn't need to be in this if-statement, i just don't want it running eternally....
     (async() => {
       try {
-        socket.emit("get_role", (copTarget, room));
+        socket.emit("get_role", [copTarget, room]);
       } catch (error) {};
     })();
     setForCop(false);
@@ -60,7 +60,7 @@ export function Dawn({ socket, username, room, role, spectator }) {
   });
 
   const ifCop = () => {
-    if (role === "cop") {
+    if (role === "cop" && copTarget !== "") {
       return `You snuck out in the dead of night to investigate ${copTarget}, and found that they are the ${copMessage}!`;
     }
     return "";
@@ -69,6 +69,9 @@ export function Dawn({ socket, username, room, role, spectator }) {
   const kill = async(target, room) => { // removes the target from socket room and database
     if (actOnce) {
       await socket.emit("kill_user", [target, room]);
+      if (username === mafiaTarget) {
+        setIsSpectator(true);
+      }
       setActOnce(false);
     }
   };
@@ -87,9 +90,6 @@ export function Dawn({ socket, username, room, role, spectator }) {
   // IF MAFIA != DOCTOR --> KILL MAFIA target + ANIMATION
   else if (mafiaTarget !== doctorTarget) {
     kill(mafiaTarget, room);
-    if (username === mafiaTarget) {
-      setIsSpectator(true);
-    }
   }
 
   const options = async () => {
@@ -159,7 +159,6 @@ export function Dawn({ socket, username, room, role, spectator }) {
   return (
     <div>
       { constant() }
-      <p> ducks are jealous of cats over cows </p>
       { ifCop() }
     </div>
   )

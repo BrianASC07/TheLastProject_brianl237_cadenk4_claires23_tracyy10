@@ -7,7 +7,7 @@ export function Night({ socket, username, room, role, spectator }) {
   const [target, setTarget] = useState("");
   const [checkRole, setCheckRole] = useState(false);
   const [roleDescription, setRoleDescription] = useState("");
-  const [seconds, setSeconds] = useState(20);
+  const [seconds, setSeconds] = useState(10);
 
     // https://react.dev/learn/synchronizing-with-effects#how-to-handle-the-effect-firing-twice-in-development
     // because of how useEffect runs their 'setup' code and 'cleanup' code, effects "running twice" often occur
