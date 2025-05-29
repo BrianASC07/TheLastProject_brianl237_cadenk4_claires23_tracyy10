@@ -16,22 +16,23 @@
         var context = drawing.getContext('2d');
 
         var image = new Image();
-        image.src = "./walking.png";
+        image.src = "./stroll.png";
         image.crossOrigin = true;
         var intervalID = null;
         var row = 0;
         var col = 0;
         image.onload = function () {
-            intervalID = setInterval(animate, 1000);
+            intervalID = setInterval(animate, 500);
             //context.drawImage(image, 1, 1, 400, 400, 0, 0, 500, 500);
         }
 
         function animate() {
-            if (col === 4) {
+            if (col === 3) {
                 col = 0;
                 row += 1;
             }
-            if (row === 4 && col === 3) {
+            console.log(row, col);
+            if (row === 3 && col === 2) {
                 clearInterval(intervalID);
             }
             context.clearRect(0, 0, 500, 500);
