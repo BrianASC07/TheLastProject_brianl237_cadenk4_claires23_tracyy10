@@ -12,17 +12,26 @@
         <p id="narration">user was taking a stroll around the neighborhood when they fell onto someone's upturned rake and was left to marinate in their big pool of blood.</p>
     </div>
     <script>
+        var narration = document.getElementById("narration");
+        narration = narration.textContent;
+
         var drawing = document.getElementById("draw_here");
         var context = drawing.getContext('2d');
 
         var image = new Image();
-        image.src = "./stroll.png";
+        image.src = "./background.png";
         image.crossOrigin = true;
         var intervalID = null;
         var row = 0;
         var col = 0;
+
+        if (narration.includes("running") || narration.includes("chase")) {
+          var speed = 500;
+        } else {
+          var speed = 100;
+        }
         image.onload = function () {
-            intervalID = setInterval(animate, 500);
+            intervalID = setInterval(animate, speed);
             //context.drawImage(image, 1, 1, 400, 400, 0, 0, 500, 500);
         }
 

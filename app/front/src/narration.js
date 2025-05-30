@@ -1,12 +1,17 @@
 const background = [
   " was taking a stroll around the neighborhood",
+  //dog
   " was taking their dog for a walk",
+  //run - background, 100?
   " was running through a big sunny field",
-  " was doing cartwheels on the grass",
+  " was scouting out possible picnic spots on the grass",
   " was cheerfully frolicking in the park",
-  " was running around their grandmother's huge garden",
+  " was running through their grandmother's huge garden",
+  //bug
   " was out and about trying to build up their bug collection",
+  //butterfly, run?
   " was trying to chase a pretty butterfly",
+  //dance, might change
   " was trying to choreograph their own interpretive dance in the park",
   " was walking in the meadow on the hunt for a new pet goat"
 ];
