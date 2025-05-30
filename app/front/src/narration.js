@@ -19,7 +19,7 @@ const action = [
   " tripped over someone's Thomas the Train toy",
   " tripped over someone's pet duck",
   " fell onto someone's thorny pet plant",
-  " tripped over someone's empty soda can", 
+  " tripped over someone's empty soda can",
   " tripped on someone's jack-o-lantern",
   " tripped over someone's evil string"
 ]
@@ -38,6 +38,8 @@ const saved = [
 //mafia select self
 //cop message
 //animations---gif? video? pixels?
+//condemn animation
+//day cycle icon
 function randomInt(max) {
   return Math.floor(Math.random()*max);
 }
@@ -59,7 +61,7 @@ export function suicide(user, death) {
   if (death) {
     return user + " stuck a fork in an outlet and got electrocuted.";
   } else {
-    return user + " tried to jump off a cliff but got saved by someone's sturdy pet bird!";
+    return user + " tried to jump off a cliff but got saved by someone's sturdy pet eagle!";
   }
 }
 
