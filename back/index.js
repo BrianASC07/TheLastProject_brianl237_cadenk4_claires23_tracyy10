@@ -137,7 +137,13 @@ io.on("connection", (socket) => { // whenever a connection to the serve is detec
   });
 
   socket.on("get_condemned", (data) => {
-
+    (async() => {
+      try {
+        socket.emit("return_condemned", await get_highest_condemn(data));
+        await set_spectator(await get_highest_condemn(data), data);
+        await reset_condemn_cnt(data);
+      } catch (error) {};
+    })();
   });
 
   socket.on("disconnect", () => {
@@ -355,4 +361,28 @@ function update_condemn_count(username, room) {
   });
 }
 
-// https://stackoverflow.com/questions/744289/how-to-increase-value-by-a-certain-number
+function get_highest_condemn(room) {
+  const db = connect();
+  return new Promise((resolve, reject) => {
+    db.all("SELECT username FROM rooms WHERE room_id = ? ORDER BY condemnCnt DESC", [room], (err, rows) => {
+      if (err) {
+        console.log(err.message);
+        reject(err);
+      }
+      resolve(rows[0].username);
+    })
+  })
+}
+
+function reset_condemn_cnt(room) {
+  const db = connect();
+  return new Promise((resolve, reject) => {
+    db.run("UPDATE rooms SET condemnCnt = 0 WHERE room_id = ?", [room], (err, rows) => {
+      if (err) {
+        console.log(err.message);
+        reject(err);
+      }
+      resolve(console.log(`Reset all condemnCnt in room_id: ${room}`));
+    })
+  })
+}
