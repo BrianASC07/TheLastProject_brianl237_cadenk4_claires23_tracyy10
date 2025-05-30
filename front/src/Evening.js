@@ -6,15 +6,25 @@ export function Evening({ socket, username, room, role, spectator }) {
   const [spectatingUserList, setSpectatingUserList] = useState([]);
   const [checkRole, setCheckRole] = useState(false);
   const [roleDescription, setRoleDescription] = useState("");
-  const [seconds, setSeconds] = useState(3);
+  const [seconds, setSeconds] = useState(5);
   const [target, setTarget]  = useState("");
   const [doOnce, setDoOnce] = useState(true);
+  const [idiotTriedToVote, setIdiotTriedToVote] = useState("");
 
   const picked_who = () => {
-    if (target !== "") {
+    if (target !== "" && spectator === false) {
       return <p> You have voted for {target} to be condemned to death! </p>
     }
     return <p> Who do you think is the most suspicious? </p>
+  }
+
+  const vote = (uname) => {
+    if (spectator === false) {
+      setTarget(uname);
+    }
+    else {
+      setIdiotTriedToVote("You may not vote, you are dead.");
+    }
   }
 
   useEffect(() => { // timer ticks down every second
@@ -103,12 +113,13 @@ export function Evening({ socket, username, room, role, spectator }) {
   options();
   return (
     <div>
-      { constant() }
+      {/* constant() */}
       <p> CONDEMN </p>
       { aliveUserList.map((uname, index) => {
-        return [<p> {uname} <button onClick={() => setTarget(uname)}> 💀 </button></p>];
+        return [<p> {uname} <button onClick={() => vote(uname)}> 💀 </button></p>];
       })}
       { picked_who() }
+      { idiotTriedToVote }
     </div>
   )
 }

@@ -48,7 +48,7 @@ export function JoinRoom({ socket }) {
             <button onClick={joinRoom}> connect </button>
           </div>
         ) : ( // else enter night
-          <Evening socket={ socket } username={ username } room={ room } role={ role } spectator= { false } />
+          <WaitingRoom socket={ socket } username={ username } room={ room } role={ role } spectator= { false } />
         )}
       </div>
     )

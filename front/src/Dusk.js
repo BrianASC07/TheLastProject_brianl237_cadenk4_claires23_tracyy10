@@ -10,35 +10,33 @@ export function Dusk({ socket, username, room, role, spectator }) {
   const [seconds, setSeconds] = useState(10);
   const [isSpectator, setIsSpectator] = useState(spectator);
   const [doOnce, setDoOnce] = useState(true);
+  const [condemned, setCondemned] = useState("");
 
   if (doOnce) {
     (async() => {
       try {
-        socket.emit("get_condemned", "");
+        socket.emit("get_condemned", room);
         setDoOnce(false);
       } catch (error) {};
     })();
   }
 
+  socket.on("return_condemned", (data) => {
+    setCondemned(data);
+  })
 
+  useEffect(() => {
+    if (username === condemned) {
+      setIsSpectator(true);
+    }
+  }, [condemned]);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  // if (condemnOnce) {
+  //   if (username === condemned) {
+  //     setIsSpectator(true);
+  //   }
+  //   setCondemnOnce(false);
+  // }
 
   useEffect(() => { // timer ticks down every second
     return () => {
@@ -49,7 +47,7 @@ export function Dusk({ socket, username, room, role, spectator }) {
   }, []);
 
   if (seconds <= 0) { // ends the night after timer is up
-    return <Evening socket={socket} username={username} room={room} role={role} spectator={spectator}/>
+    return <Night socket={socket} username={username} room={room} role={role} spectator={isSpectator}/>
   }
 
   const options = async () => {
@@ -118,8 +116,9 @@ export function Dusk({ socket, username, room, role, spectator }) {
   options();
   return (
     <div>
-      <p> meow </p>
-      { constant() }
+      {/* constant() */}
+      <p> {condemned} has been sentenced to death by DEATH!!!! </p>
+      <p> whomp whomp </p>
     </div>
   )
 }

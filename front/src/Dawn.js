@@ -25,6 +25,12 @@ export function Dawn({ socket, username, room, role, spectator }) {
     }
   }, []);
 
+  useEffect(() => {
+    if (username === mafiaTarget) {
+      setIsSpectator(true);
+    }
+  }, [mafiaTarget]);
+
   if (seconds <= 0) { // ends the night after timer is up
     return <Morning socket={socket} username={username} room={room} role={role} spectator={isSpectator}/>
   }
@@ -70,7 +76,6 @@ export function Dawn({ socket, username, room, role, spectator }) {
     if (actOnce) {
       await socket.emit("kill_user", [target, room]);
       if (username === mafiaTarget) {
-        setIsSpectator(true);
       }
       setActOnce(false);
     }
@@ -84,7 +89,6 @@ export function Dawn({ socket, username, room, role, spectator }) {
   // IF MAFIA == MAFIA --> KILL MAFIA target + ANIMATION
   else if (mafiaTarget === username) {
     kill(mafiaTarget, room);
-    setIsSpectator(true);
   }
 
   // IF MAFIA != DOCTOR --> KILL MAFIA target + ANIMATION
