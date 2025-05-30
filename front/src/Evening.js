@@ -1,21 +1,21 @@
 import React, { useEffect, useState } from "react";
-import { Morning } from './Morning.js';
-import { Night } from './Night.js';
+import { Dusk } from './Dusk.js';
 
-export function Dawn({ socket, username, room, role, spectator }) {
-  const [useOnce, setUseOnce] = useState(true);
-  const [actOnce, setActOnce] = useState(true);
-  const [forCop, setForCop] = useState(true);
+export function Evening({ socket, username, room, role, spectator }) {
   const [aliveUserList, setAliveUserList] = useState([]);
   const [spectatingUserList, setSpectatingUserList] = useState([]);
   const [checkRole, setCheckRole] = useState(false);
   const [roleDescription, setRoleDescription] = useState("");
-  const [mafiaTarget, setMafiaTarget] = useState("");
-  const [doctorTarget, setDoctorTarget] = useState("");
-  const [copTarget, setCopTarget] = useState("");
-  const [seconds, setSeconds] = useState(10);
-  const [isSpectator, setIsSpectator] = useState(spectator);
-  const [copMessage, setCopMessage] = useState("");
+  const [seconds, setSeconds] = useState(3);
+  const [target, setTarget]  = useState("");
+  const [doOnce, setDoOnce] = useState(true);
+
+  const picked_who = () => {
+    if (target !== "") {
+      return <p> You have voted for {target} to be condemned to death! </p>
+    }
+    return <p> Who do you think is the most suspicious? </p>
+  }
 
   useEffect(() => { // timer ticks down every second
     return () => {
@@ -25,71 +25,16 @@ export function Dawn({ socket, username, room, role, spectator }) {
     }
   }, []);
 
-  if (seconds <= 0) { // ends the night after timer is up
-    return <Morning socket={socket} username={username} room={room} role={role} spectator={isSpectator}/>
-  }
-
-  if (useOnce) { // grab the targets from backend once
-    socket.emit("get_mafia", "");
-    socket.emit("get_doctor", "");
-    socket.emit("get_cop", "");
-    setUseOnce(false);
-  }
-
-  socket.on("recieve_mafia", (data) => {
-    setMafiaTarget(data);
-  });
-  socket.on("recieve_doctor", (data) => {
-    setDoctorTarget(data);
-  });
-  socket.on("recieve_cop", (data) => {
-    setCopTarget(data);
-  });
-
-  if (forCop && copTarget !== "") { // doesn't need to be in this if-statement, i just don't want it running eternally....
-    (async() => {
-      try {
-        socket.emit("get_role", [copTarget, room]);
-      } catch (error) {};
-    })();
-    setForCop(false);
-  }
-
-  socket.on("return_role", (data) => {
-    setCopMessage(data);
-  });
-
-  const ifCop = () => {
-    if (role === "cop" && copTarget !== "") {
-      return `You snuck out in the dead of night to investigate ${copTarget}, and found that they are the ${copMessage}!`;
+  if (seconds <= 0 ) { // ends the night after timer is up
+    if (doOnce) {
+      (async() => {
+        try {
+          await socket.emit("update_condemnCnt", [username, room]);
+          setDoOnce(false);
+        } catch (error) {};
+      })();
     }
-    return "";
-  }
-
-  const kill = async(target, room) => { // removes the target from socket room and database
-    if (actOnce) {
-      await socket.emit("kill_user", [target, room]);
-      if (username === mafiaTarget) {
-        setIsSpectator(true);
-      }
-      setActOnce(false);
-    }
-  };
-
-  // IF MAFIA == DOCTOR --> NO KILL + ANIMATION
-  if (mafiaTarget === doctorTarget) {
-    // no kill...
-  }
-
-  // IF MAFIA == MAFIA --> KILL MAFIA target + ANIMATION
-  else if (mafiaTarget === username) {
-    kill(mafiaTarget, room);
-    setIsSpectator(true);
-  }
-
-  // IF MAFIA != DOCTOR --> KILL MAFIA target + ANIMATION
-  else if (mafiaTarget !== doctorTarget) {
-    kill(mafiaTarget, room);
+    return <Dusk socket={socket} username={username} room={room} role={role} spectator={spectator}/>
   }
 
   const options = async () => {
@@ -159,9 +104,13 @@ export function Dawn({ socket, username, room, role, spectator }) {
   return (
     <div>
       { constant() }
-      { ifCop() }
+      <p> CONDEMN </p>
+      { aliveUserList.map((uname, index) => {
+        return [<p> {uname} <button onClick={() => setTarget(uname)}> 💀 </button></p>];
+      })}
+      { picked_who() }
     </div>
   )
 }
 
-export default Dawn
+export default Evening

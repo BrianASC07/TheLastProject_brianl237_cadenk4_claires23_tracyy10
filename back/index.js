@@ -87,7 +87,6 @@ io.on("connection", (socket) => { // whenever a connection to the serve is detec
   socket.on("set_cop", (data) => {
     console.log("cop selected : " + data);
     copSelect = data;
-    console.log(copSelect);
   });
 
   socket.on("get_mafia", (data) => {
@@ -129,6 +128,18 @@ io.on("connection", (socket) => { // whenever a connection to the serve is detec
     })();
   });
 
+  socket.on("update_condemnCnt", (data) => {
+    (async() => {
+      try {
+        await update_condemn_count(data[0], data[1]);
+      } catch (error) {};
+    })();
+  });
+
+  socket.on("get_condemned", (data) => {
+
+  });
+
   socket.on("disconnect", () => {
     (async () => { try { await remove_from_room(socket.id) } catch (error) { } })();
     console.log("User disconnected: ", socket.id) // listens to disconnects from the server
@@ -166,7 +177,7 @@ function createTable() {
   const db = connect();
   return new Promise((resolve, reject) => {
     const tables = `
-      CREATE TABLE IF NOT EXISTS rooms(user_id TEXT, room_id TEXT, role TEXT, username TEXT, spectating REAL);
+      CREATE TABLE IF NOT EXISTS rooms(user_id TEXT, room_id TEXT, role TEXT, username TEXT, spectating REAL, condemnCnt REAL);
     `;
     db.run(tables, (err) => {
       if (err) {
@@ -195,7 +206,7 @@ function pick_role(in_room) {
 function add_to_room(user_id, room_id, role, username, socket) {
   const db = connect();
   return new Promise((resolve, reject) => {
-    db.run("INSERT INTO rooms (user_id, room_id, role, username, spectating) VALUES (?, ?, ?, ?, ?)", [user_id, room_id, role, username, 0], (err) => {
+    db.run("INSERT INTO rooms (user_id, room_id, role, username, spectating, condemnCnt) VALUES (?, ?, ?, ?, ?, ?)", [user_id, room_id, role, username, 0, 0], (err) => {
       if (err) {
         console.log(err.message);
         reject(err);
@@ -329,3 +340,19 @@ function get_role(username, room) {
     close(db);
   });
 }
+
+function update_condemn_count(username, room) {
+  const db = connect();
+  return new Promise((resolve, reject) => {
+    db.run("UPDATE rooms SET condemnCnt = condemnCnt +1 WHERE username = ? AND room_id = ?", [username, room], (err, rows) => {
+      if (err) {
+        console.log(err.message);
+        reject(err);
+      }
+      resolve(console.log(`Someone has voted for ${username}`));
+    });
+    close(db);
+  });
+}
+
+// https://stackoverflow.com/questions/744289/how-to-increase-value-by-a-certain-number

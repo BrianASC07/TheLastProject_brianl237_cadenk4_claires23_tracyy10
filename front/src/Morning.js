@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { Night, constant } from './Night.js';
+import { Evening } from './Evening.js';
 
-export function Chat({ socket, username, room, role, spectator }) {
+export function Morning({ socket, username, room, role, spectator }) {
     const [currentMessage, setCurrentMessage] = useState(""); // use setCurrentMessage to update var currentMessage
     const [messageList, setMessageList] = useState([]);
     const [seconds, setSeconds] = useState(10);
@@ -42,7 +42,7 @@ export function Chat({ socket, username, room, role, spectator }) {
     }, [socket]);
 
     if (seconds <= 0) { // ends the night after timer is up
-        return <Night socket={socket} username={username} room={room} role={role} spectator={spectator} />
+        return <Evening socket={socket} username={username} room={room} role={role} spectator={spectator} />
     }
 
     const options = async () => {
@@ -151,4 +151,4 @@ export function Chat({ socket, username, room, role, spectator }) {
     );
 }
 
-export default Chat
+export default Morning

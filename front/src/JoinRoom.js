@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { WaitingRoom } from './WaitingRoom.js';
 import { Night } from './Night.js';
+import { Evening } from './Evening.js';
 
 export function JoinRoom({ socket }) {
   const [username, setUsername] = useState(""); // useState keeps track of the updated state of the variable
@@ -47,7 +48,7 @@ export function JoinRoom({ socket }) {
             <button onClick={joinRoom}> connect </button>
           </div>
         ) : ( // else enter night
-          <WaitingRoom socket={ socket } username={ username } room={ room } role={ role } spectator= { false } />
+          <Evening socket={ socket } username={ username } room={ room } role={ role } spectator= { false } />
         )}
       </div>
     )
