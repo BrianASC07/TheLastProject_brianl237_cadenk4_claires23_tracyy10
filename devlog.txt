@@ -65,5 +65,12 @@ tracyY --2025-05-28 11:45
 - night cycle loops properly with dawn
 - added spectating when dead
 
+tracyY --2025-05-29 X:XX
+- added cop roles
+
+tracyY --2025-05-30 X:XX
+- waiting room now shows how many members (and who) are in the room
+- working on evening and dusk
+
 JavaScript style revisions 5/23:
  - the biggest issue is most likely with the usage of arrow functions instead of function declarations even when they are not necessary, such as in App.js. If time allows, we will likely go through the code and clean up functions as needed
