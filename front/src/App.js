@@ -7,7 +7,7 @@ const socket = io.connect("http://localhost:3001"); // connects this to the back
 function App() {
 
   return (
-    <JoinRoom socket={ socket }/>
+    <JoinRoom socket={socket} />
   )
 }
 

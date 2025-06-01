@@ -1,54 +1,62 @@
 import React, { useEffect, useState } from "react";
-import { Evening } from './Evening.js';
 import { Night } from './Night.js';
 
-export function Dusk({ socket, username, room, role, spectator }) {
+export function Dusk({ socket, username, room, role, spectator, condemn}) {
   const [aliveUserList, setAliveUserList] = useState([]);
   const [spectatingUserList, setSpectatingUserList] = useState([]);
   const [checkRole, setCheckRole] = useState(false);
   const [roleDescription, setRoleDescription] = useState("");
-  const [seconds, setSeconds] = useState(10);
+  const [seconds, setSeconds] = useState(15);
   const [isSpectator, setIsSpectator] = useState(spectator);
-  const [doOnce, setDoOnce] = useState(true);
-  const [condemned, setCondemned] = useState("");
-
-  if (doOnce) {
-    (async() => {
-      try {
-        socket.emit("get_condemned", room);
-        setDoOnce(false);
-      } catch (error) {};
-    })();
-  }
-
-  socket.on("return_condemned", (data) => {
-    setCondemned(data);
-  })
-
-  useEffect(() => {
-    if (username === condemned) {
-      setIsSpectator(true);
-    }
-  }, [condemned]);
-
-  // if (condemnOnce) {
-  //   if (username === condemned) {
-  //     setIsSpectator(true);
-  //   }
-  //   setCondemnOnce(false);
-  // }
+  const [doOnce2, setDoOnce2] = useState(true);
+  const [redirect, setRedirect] = useState(false);
+  const [redirectOnce, setRedirectOnce] = useState(true);
 
   useEffect(() => { // timer ticks down every second
     return () => {
       setInterval(() => {
-        setSeconds(prevSeconds => prevSeconds-1);
+        setSeconds(prevSeconds => prevSeconds - 1);
       }, 1000); // 1000 ms -> s
     }
   }, []);
 
-  if (seconds <= 0) { // ends the night after timer is up
-    return <Night socket={socket} username={username} room={room} role={role} spectator={isSpectator}/>
+  const show_condemned = () => {
+    if (condemn !== "") {
+      return `${condemn} has been sentenced to death by DEATH!!!!`
+    }
+    else {
+      return `A decision could not be reached. Everyone returns to their own cabins feeling uneasy.`
+    }
   }
+
+  if (seconds <= 0) { // ends the night after timer is up
+    if (doOnce2) {
+      (async () => {
+        try {
+          await socket.emit("reset_condemn_cnts", room);
+          if (username === condemn) {
+            setIsSpectator(true);
+          }
+          setDoOnce2(false);
+        } catch (error) { };
+      })();
+    }
+    
+    // if (redirectOnce) {
+    //   socket.emit("redirect_all_in_room", room);
+    //   setRedirectOnce(false);
+    // }
+
+    return <Night socket={socket} username={username} room={room} role={role} spectator={isSpectator} />
+  }
+
+  // if (redirect && seconds < 10) {
+  //   return <Night socket={socket} username={username} room={room} role={role} spectator={isSpectator} />
+  // }
+
+  // socket.on("redirect", (data) => {
+  //   setRedirect(data);
+  // });
 
   const options = async () => {
     await socket.emit("request_alive_userList", room);
@@ -117,8 +125,11 @@ export function Dusk({ socket, username, room, role, spectator }) {
   return (
     <div>
       {/* constant() */}
-      <p> {condemned} has been sentenced to death by DEATH!!!! </p>
-      <p> whomp whomp </p>
+      <p> dusk </p>
+      <p> this is who {condemn} </p>
+      {seconds}
+
+      <p> {show_condemned()} </p>
     </div>
   )
 }

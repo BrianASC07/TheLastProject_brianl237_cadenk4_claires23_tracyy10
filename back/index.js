@@ -39,7 +39,7 @@ io.on("connection", (socket) => { // whenever a connection to the serve is detec
         }
         else {
           socket.emit("do_not_join", true);
-          console.log(`Room ${data} is full.`);
+          console.log(`Room ${room} is full.`);
         }
       } catch (error) { }
     })();
@@ -54,7 +54,7 @@ io.on("connection", (socket) => { // whenever a connection to the serve is detec
     (async () => {
       try {
         socket.emit("user_list", await get_users_in_room(data));
-      } catch (error) {}
+      } catch (error) { }
     })();
   });
 
@@ -62,7 +62,7 @@ io.on("connection", (socket) => { // whenever a connection to the serve is detec
     (async () => {
       try {
         socket.emit("user_alive_list", await get_alive_users_in_room(data));
-      } catch (error) {}
+      } catch (error) { }
     })();
   });
 
@@ -70,7 +70,7 @@ io.on("connection", (socket) => { // whenever a connection to the serve is detec
     (async () => {
       try {
         socket.emit("user_spectating_list", await get_spectating_users_in_room(data));
-      } catch (error) {}
+      } catch (error) { }
     })();
   });
 
@@ -102,54 +102,78 @@ io.on("connection", (socket) => { // whenever a connection to the serve is detec
   });
 
   socket.on("force_disconnect", (data) => {
-    (async() => {
+    (async () => {
       try {
         const userID = await get_user_id(data[0], data[1]);
         await remove_from_room(userID);
         io.in(userID).disconnectSockets();
-      } catch (error) {}
+      } catch (error) { }
     })();
   });
 
   socket.on("kill_user", (data) => {
-    (async() => {
+    (async () => {
       try {
         await set_spectator(data[0], data[1]);
-      } catch (error) {}
+      } catch (error) { }
     })();
   });
 
   socket.on("get_role", (data) => {
-    (async() => {
+    (async () => {
       try {
-        console.log(data);
         socket.emit("return_role", await get_role(data[0], data[1]));
-      } catch (error) {}
+      } catch (error) { }
     })();
   });
 
   socket.on("update_condemnCnt", (data) => {
-    (async() => {
+    (async () => {
       try {
         await update_condemn_count(data[0], data[1]);
-      } catch (error) {};
+      } catch (error) { };
     })();
   });
 
   socket.on("get_condemned", (data) => {
-    (async() => {
+    (async () => {
       try {
-        socket.emit("return_condemned", await get_highest_condemn(data));
-        await set_spectator(await get_highest_condemn(data), data);
-        await reset_condemn_cnt(data);
-      } catch (error) {};
+        const condemned_name = await get_highest_condemn(data);
+        if (condemned_name[0][1] === 0) {
+          socket.emit("return_condemned", "");
+        }
+        else if (condemned_name.length > 1 && condemned_name[0][1] === condemned_name[1][1]) {
+          socket.emit("return_condemned", "");
+        }
+        else {
+          socket.emit("return_condemned", condemned_name[0][0]);
+          await set_spectator(await condemned_name[0][0], data);
+        }
+      } catch (error) { };
     })();
   });
+
+  socket.on("reset_condemn_cnts", (data) => {
+    (async () => {
+      try {
+        await reset_condemn_cnt(data);
+      } catch (error) { };
+    })();
+  });
+
+  socket.on("redirect_all_in_room", (data) => { // [room, page]
+    // console.log("is redirecting .........................");
+    socket.to(data).emit("redirect", true);
+  })
 
   socket.on("disconnect", () => {
     (async () => { try { await remove_from_room(socket.id) } catch (error) { } })();
     console.log("User disconnected: ", socket.id) // listens to disconnects from the server
   });
+
+  socket.on("test", (data) => {
+    console.log(`!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ${data}`);
+  })
 });
 
 server.listen(3001, () => { // run 'npm start'
@@ -364,14 +388,34 @@ function update_condemn_count(username, room) {
 function get_highest_condemn(room) {
   const db = connect();
   return new Promise((resolve, reject) => {
-    db.all("SELECT username FROM rooms WHERE room_id = ? ORDER BY condemnCnt DESC", [room], (err, rows) => {
+    db.all("SELECT * FROM rooms WHERE room_id = ? ORDER BY condemnCnt DESC", [room], (err, rows) => {
       if (err) {
         console.log(err.message);
         reject(err);
       }
-      resolve(rows[0].username);
-    })
-  })
+      var ret = [];
+      rows.map((row, index) => {
+        ret.push([row.username, row.condemnCnt]);
+      })
+      console.log(ret);
+      resolve(ret);
+      // if (rows[0].condemnCnt === 0) { // if no one was voted
+      //   console.log("THIIS HAPPENED!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+      //   resolve("");
+      // }
+      // else if (rows.length > 1) { // if tie
+      //   if (rows[0].condemnCnt === rows[1].condemnCnt) {
+      //     console.log("THIIS HAPPENED@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+      //     resolve("");
+      //   }
+      // }
+      // else {
+      //   console.log("THIIS HAPPENED=========================================");
+      //   resolve(rows[0].username);
+      // }
+    });
+    close(db);
+  });
 }
 
 function reset_condemn_cnt(room) {

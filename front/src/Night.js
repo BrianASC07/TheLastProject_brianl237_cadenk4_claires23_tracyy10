@@ -7,22 +7,24 @@ export function Night({ socket, username, room, role, spectator }) {
   const [target, setTarget] = useState("");
   const [checkRole, setCheckRole] = useState(false);
   const [roleDescription, setRoleDescription] = useState("");
-  const [seconds, setSeconds] = useState(10);
+  const [seconds, setSeconds] = useState(15);
+  const [redirect, setRedirect] = useState(false);
+  const [redirectOnce, setRedirectOnce] = useState(true);
 
-    // https://react.dev/learn/synchronizing-with-effects#how-to-handle-the-effect-firing-twice-in-development
-    // because of how useEffect runs their 'setup' code and 'cleanup' code, effects "running twice" often occur
-    // to fix, add the 'cleanup' code which undos the 'setup' code (first instance of running is for bug catching)
-    // in this case, i just put everything inside the 'cleanup' code, which idk if its good practice? but it worked :D
+  // https://react.dev/learn/synchronizing-with-effects#how-to-handle-the-effect-firing-twice-in-development
+  // because of how useEffect runs their 'setup' code and 'cleanup' code, effects "running twice" often occur
+  // to fix, add the 'cleanup' code which undos the 'setup' code (first instance of running is for bug catching)
+  // in this case, i just put everything inside the 'cleanup' code, which idk if its good practice? but it worked :D
 
   useEffect(() => { // timer ticks down every second
     return () => {
       setInterval(() => {
-        setSeconds(prevSeconds => prevSeconds-1);
+        setSeconds(prevSeconds => prevSeconds - 1);
       }, 1000); // 1000 ms -> s
     }
   }, []);
 
-   useEffect(() => {
+  useEffect(() => {
     if (role === 'mafia') {
       socket.emit("set_mafia", target);
     }
@@ -32,11 +34,23 @@ export function Night({ socket, username, room, role, spectator }) {
     if (role === 'cop') {
       socket.emit("set_cop", target);
     }
-    }, [role, socket, target]);
+  }, [role, socket, target]);
 
   if (seconds <= 0) { // ends the night after timer is up
-    return <Dawn socket={socket} username={username} room={room} role={ role } spectator= { spectator }/>
+    // if (redirectOnce) {
+    //   socket.emit("redirect_all_in_room", room);
+    //   setRedirectOnce(false);
+    // }
+    return <Dawn socket={socket} username={username} room={room} role={role} spectator={spectator} />
   }
+
+  // if (redirect && seconds < 10) {
+  //   return <Dawn socket={socket} username={username} room={room} role={role} spectator={spectator} />
+  // }
+
+  // socket.on("redirect", (data) => {
+  //   setRedirect(data);
+  // });
 
   const options = async () => {
     await socket.emit("request_alive_userList", room);
@@ -149,7 +163,9 @@ export function Night({ socket, username, room, role, spectator }) {
   else {
     return ( // innocent
       <div>
-        {constant()}
+        {/* constant() */}
+        <p> night </p>
+        {seconds}
       </div>
     );
   }

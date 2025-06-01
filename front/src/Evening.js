@@ -6,10 +6,13 @@ export function Evening({ socket, username, room, role, spectator }) {
   const [spectatingUserList, setSpectatingUserList] = useState([]);
   const [checkRole, setCheckRole] = useState(false);
   const [roleDescription, setRoleDescription] = useState("");
-  const [seconds, setSeconds] = useState(5);
-  const [target, setTarget]  = useState("");
+  const [seconds, setSeconds] = useState(15);
+  const [target, setTarget] = useState("");
   const [doOnce, setDoOnce] = useState(true);
   const [idiotTriedToVote, setIdiotTriedToVote] = useState("");
+  const [redirect, setRedirect] = useState(false);
+  const [redirectOnce, setRedirectOnce] = useState(true);
+  const [condemned, setCondemned] = useState("");
 
   const picked_who = () => {
     if (target !== "" && spectator === false) {
@@ -30,22 +33,41 @@ export function Evening({ socket, username, room, role, spectator }) {
   useEffect(() => { // timer ticks down every second
     return () => {
       setInterval(() => {
-        setSeconds(prevSeconds => prevSeconds-1);
+        setSeconds(prevSeconds => prevSeconds - 1);
       }, 1000); // 1000 ms -> s
     }
   }, []);
 
-  if (seconds <= 0 ) { // ends the night after timer is up
-    if (doOnce) {
-      (async() => {
+  if (seconds <= 0) { // ends the night after timer is up
+    if (doOnce && target !== "") {
+      (async () => {
         try {
-          await socket.emit("update_condemnCnt", [username, room]);
+          await socket.emit("update_condemnCnt", [target, room]);
+          await socket.emit("get_condemned", room);
           setDoOnce(false);
-        } catch (error) {};
+        } catch (error) { };
       })();
     }
-    return <Dusk socket={socket} username={username} room={room} role={role} spectator={spectator}/>
+
+    if (redirectOnce && doOnce == false) {
+      socket.emit("redirect_all_in_room", room);
+      setRedirectOnce(false);
+    }
+    // return <Dusk socket={socket} username={username} room={room} role={role} spectator={spectator} />
   }
+
+  socket.on("return_condemned", (data) => {
+    setCondemned(data);
+  })
+
+  if (redirect && seconds < 10) {
+    socket.emit("test", condemned);
+    return <Dusk socket={socket} username={username} room={room} role={role} spectator={spectator} condemn={condemned}/>
+  }
+
+  socket.on("redirect", (data) => {
+    setRedirect(data);
+  });
 
   const options = async () => {
     await socket.emit("request_alive_userList", room);
@@ -114,12 +136,15 @@ export function Evening({ socket, username, room, role, spectator }) {
   return (
     <div>
       {/* constant() */}
+      <p> evening </p>
+      {seconds}
+
       <p> CONDEMN </p>
-      { aliveUserList.map((uname, index) => {
+      {aliveUserList.map((uname, index) => {
         return [<p> {uname} <button onClick={() => vote(uname)}> 💀 </button></p>];
       })}
-      { picked_who() }
-      { idiotTriedToVote }
+      <p> {picked_who()} </p>
+      <p> {idiotTriedToVote} </p>
     </div>
   )
 }

@@ -13,16 +13,16 @@ export function WaitingRoom({ socket, username, room, role, spectator }) {
   });
 
   if (userList.length === 5) {
-    return <Night socket={ socket } username={ username } room={ room } role={ role } spectator= { spectator }/>
+    return <Night socket={socket} username={username} room={room} role={role} spectator={spectator} />
   }
 
   options();
   return (
     <div>
       <p> WAITING ROOM </p>
-      <p> Users in room: { userList.length } / 5 </p>
-      { userList.map((uname, index) => {
-        return <p> { uname } </p>;
+      <p> Users in room: {userList.length} / 5 </p>
+      {userList.map((uname, index) => {
+        return <p> {uname} </p>;
       })}
     </div>
   )

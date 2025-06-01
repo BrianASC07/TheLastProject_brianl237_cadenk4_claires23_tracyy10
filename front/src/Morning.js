@@ -4,11 +4,13 @@ import { Evening } from './Evening.js';
 export function Morning({ socket, username, room, role, spectator }) {
     const [currentMessage, setCurrentMessage] = useState(""); // use setCurrentMessage to update var currentMessage
     const [messageList, setMessageList] = useState([]);
-    const [seconds, setSeconds] = useState(10);
+    const [seconds, setSeconds] = useState(15);
     const [aliveUserList, setAliveUserList] = useState([]);
     const [spectatingUserList, setSpectatingUserList] = useState([]);
     const [checkRole, setCheckRole] = useState(false);
     const [roleDescription, setRoleDescription] = useState("");
+    const [redirect, setRedirect] = useState(false);
+    const [redirectOnce, setRedirectOnce] = useState(true);
 
     useEffect(() => { // timer ticks down every second
         return () => {
@@ -42,8 +44,20 @@ export function Morning({ socket, username, room, role, spectator }) {
     }, [socket]);
 
     if (seconds <= 0) { // ends the night after timer is up
+        if (redirectOnce) {
+            socket.emit("redirect_all_in_room", room);
+            setRedirectOnce(false);
+        }
+        // return <Evening socket={socket} username={username} room={room} role={role} spectator={spectator} />
+    }
+
+    if (redirect && seconds < 10) {
         return <Evening socket={socket} username={username} room={room} role={role} spectator={spectator} />
     }
+
+    socket.on("redirect", (data) => {
+        setRedirect(data);
+    });
 
     const options = async () => {
         await socket.emit("request_alive_userList", room);
@@ -111,7 +125,7 @@ export function Morning({ socket, username, room, role, spectator }) {
     options();
     return (
         <div>
-            {constant()}
+            {/* constant() */}
             <div className="chat-window">
                 <div className="chat-header">
                     <p> chat header!!! </p>
