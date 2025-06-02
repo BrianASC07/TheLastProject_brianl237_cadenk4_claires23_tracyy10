@@ -6,7 +6,11 @@ const { Server } = require("socket.io");
 const sqlite3 = require("sqlite3");
 app.use(cors());
 
-let save_record = "";
+
+var mafiaSelect = "";
+var doctorSelect = "";
+var copSelect = "";
+
 
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -35,7 +39,7 @@ io.on("connection", (socket) => { // whenever a connection to the serve is detec
         }
         else {
           socket.emit("do_not_join", true);
-          console.log(`Room ${data} is full.`);
+          console.log(`Room ${room} is full.`);
         }
       } catch (error) { }
     })();
@@ -50,35 +54,126 @@ io.on("connection", (socket) => { // whenever a connection to the serve is detec
     (async () => {
       try {
         socket.emit("user_list", await get_users_in_room(data));
-      } catch (error) {}
+      } catch (error) { }
     })();
   });
 
-  socket.on("update_save", (data) => {
-    console.log("PRE SVAE CHANGE : " + save_record);
-    save_record = data;
-    console.log("POST SVAE CHANGE : " + save_record);
+  socket.on("request_alive_userList", (data) => {
+    (async () => {
+      try {
+        socket.emit("user_alive_list", await get_alive_users_in_room(data));
+      } catch (error) { }
+    })();
+  });
+
+  socket.on("request_spectating_userList", (data) => {
+    (async () => {
+      try {
+        socket.emit("user_spectating_list", await get_spectating_users_in_room(data));
+      } catch (error) { }
+    })();
+  });
+
+  socket.on("set_mafia", (data) => {
+    console.log("mafia selected : " + data);
+    mafiaSelect = data;
+  });
+
+  socket.on("set_doctor", (data) => {
+    console.log("doctor selected : " + data);
+    doctorSelect = data;
+  });
+
+  socket.on("set_cop", (data) => {
+    console.log("cop selected : " + data);
+    copSelect = data;
+  });
+
+  socket.on("get_mafia", (data) => {
+    socket.emit("recieve_mafia", mafiaSelect);
+  });
+
+  socket.on("get_doctor", (data) => {
+    socket.emit("recieve_doctor", doctorSelect);
+  });
+
+  socket.on("get_cop", (data) => {
+    socket.emit("recieve_cop", copSelect);
   });
 
   socket.on("force_disconnect", (data) => {
-    console.log("POST SVAE CHANGE DATA : " + data[0]);
-    console.log("COMPARE SVAE CHANGE : " + save_record);
-    if (data[0] !== save_record) {
-      (async() => {
+    (async () => {
       try {
         const userID = await get_user_id(data[0], data[1]);
         await remove_from_room(userID);
         io.in(userID).disconnectSockets();
-      } catch (error) {}
+      } catch (error) { }
     })();
-    }
-    save_record = "";
   });
+
+  socket.on("kill_user", (data) => {
+    (async () => {
+      try {
+        await set_spectator(data[0], data[1]);
+      } catch (error) { }
+    })();
+  });
+
+  socket.on("get_role", (data) => {
+    (async () => {
+      try {
+        socket.emit("return_role", await get_role(data[0], data[1]));
+      } catch (error) { }
+    })();
+  });
+
+  socket.on("update_condemnCnt", (data) => {
+    (async () => {
+      try {
+        await update_condemn_count(data[0], data[1]);
+      } catch (error) { };
+    })();
+  });
+
+  socket.on("get_condemned", (data) => {
+    (async () => {
+      try {
+        const condemned_name = await get_highest_condemn(data);
+        if (condemned_name[0][1] === 0) {
+          socket.emit("return_condemned", "");
+        }
+        else if (condemned_name.length > 1 && condemned_name[0][1] === condemned_name[1][1]) {
+          socket.emit("return_condemned", "");
+        }
+        else {
+          socket.emit("return_condemned", condemned_name[0][0]);
+          await set_spectator(await condemned_name[0][0], data);
+        }
+      } catch (error) { };
+    })();
+  });
+
+  socket.on("reset_condemn_cnts", (data) => {
+    (async () => {
+      try {
+        await reset_condemn_cnt(data);
+      } catch (error) { };
+    })();
+  });
+
+  socket.on("redirect_all_in_room", (data) => { // [room, page]
+    // console.log("is redirecting .........................");
+    socket.to(data).emit("redirect", true);
+  })
 
   socket.on("disconnect", () => {
     (async () => { try { await remove_from_room(socket.id) } catch (error) { } })();
     console.log("User disconnected: ", socket.id) // listens to disconnects from the server
   });
+
+  socket.on("test", (data) => {
+    console.log(`!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ${data}`);
+  })
 });
 
 server.listen(3001, () => { // run 'npm start'
@@ -112,7 +207,7 @@ function createTable() {
   const db = connect();
   return new Promise((resolve, reject) => {
     const tables = `
-      CREATE TABLE IF NOT EXISTS rooms(user_id TEXT, room_id TEXT, role TEXT, username TEXT);
+      CREATE TABLE IF NOT EXISTS rooms(user_id TEXT, room_id TEXT, role TEXT, username TEXT, spectating REAL, condemnCnt REAL);
     `;
     db.run(tables, (err) => {
       if (err) {
@@ -141,7 +236,7 @@ function pick_role(in_room) {
 function add_to_room(user_id, room_id, role, username, socket) {
   const db = connect();
   return new Promise((resolve, reject) => {
-    db.run("INSERT INTO rooms (user_id, room_id, role, username) VALUES (?, ?, ?, ?)", [user_id, room_id, role, username], (err) => {
+    db.run("INSERT INTO rooms (user_id, room_id, role, username, spectating, condemnCnt) VALUES (?, ?, ?, ?, ?, ?)", [user_id, room_id, role, username, 0, 0], (err) => {
       if (err) {
         console.log(err.message);
         reject(err);
@@ -201,6 +296,38 @@ function get_users_in_room(room) {
   });
 }
 
+function get_alive_users_in_room(room) {
+  const db = connect();
+  return new Promise((resolve, reject) => {
+    db.all("SELECT username FROM rooms WHERE room_id = ? AND spectating = ?", [room, 0], (err, rows) => {
+      if (err) {
+        console.log(err.message);
+        reject(err);
+      }
+      const ret = []
+      rows.forEach(value => ret.push(value.username));
+      resolve(ret);
+    });
+    close(db);
+  });
+}
+
+function get_spectating_users_in_room(room) {
+  const db = connect();
+  return new Promise((resolve, reject) => {
+    db.all("SELECT username FROM rooms WHERE room_id = ? AND spectating = ?", [room, 1], (err, rows) => {
+      if (err) {
+        console.log(err.message);
+        reject(err);
+      }
+      const ret = []
+      rows.forEach(value => ret.push(value.username));
+      resolve(ret);
+    });
+    close(db);
+  });
+}
+
 function get_user_id(username, room) {
   const db = connect();
   return new Promise((resolve, reject) => {
@@ -213,4 +340,93 @@ function get_user_id(username, room) {
     });
     close(db);
   });
+}
+
+function set_spectator(username, room) {
+  const db = connect();
+  return new Promise((resolve, reject) => {
+    db.run("UPDATE rooms SET spectating = 1 WHERE username = ? AND room_id = ?", [username, room], (err, rows) => {
+      if (err) {
+        console.log(err.message);
+        reject(err);
+      }
+      resolve(console.log(`Set ${username} as spectator.`));
+    });
+    close(db);
+  });
+
+}
+
+function get_role(username, room) {
+  const db = connect();
+  return new Promise((resolve, reject) => {
+    db.get("SELECT role FROM rooms WHERE username = ? AND room_id = ?", [username, room], (err, rows) => {
+      if (err) {
+        console.log(err.message);
+        reject(err);
+      }
+      resolve(rows.role);
+    });
+    close(db);
+  });
+}
+
+function update_condemn_count(username, room) {
+  const db = connect();
+  return new Promise((resolve, reject) => {
+    db.run("UPDATE rooms SET condemnCnt = condemnCnt +1 WHERE username = ? AND room_id = ?", [username, room], (err, rows) => {
+      if (err) {
+        console.log(err.message);
+        reject(err);
+      }
+      resolve(console.log(`Someone has voted for ${username}`));
+    });
+    close(db);
+  });
+}
+
+function get_highest_condemn(room) {
+  const db = connect();
+  return new Promise((resolve, reject) => {
+    db.all("SELECT * FROM rooms WHERE room_id = ? ORDER BY condemnCnt DESC", [room], (err, rows) => {
+      if (err) {
+        console.log(err.message);
+        reject(err);
+      }
+      var ret = [];
+      rows.map((row, index) => {
+        ret.push([row.username, row.condemnCnt]);
+      })
+      console.log(ret);
+      resolve(ret);
+      // if (rows[0].condemnCnt === 0) { // if no one was voted
+      //   console.log("THIIS HAPPENED!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+      //   resolve("");
+      // }
+      // else if (rows.length > 1) { // if tie
+      //   if (rows[0].condemnCnt === rows[1].condemnCnt) {
+      //     console.log("THIIS HAPPENED@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+      //     resolve("");
+      //   }
+      // }
+      // else {
+      //   console.log("THIIS HAPPENED=========================================");
+      //   resolve(rows[0].username);
+      // }
+    });
+    close(db);
+  });
+}
+
+function reset_condemn_cnt(room) {
+  const db = connect();
+  return new Promise((resolve, reject) => {
+    db.run("UPDATE rooms SET condemnCnt = 0 WHERE room_id = ?", [room], (err, rows) => {
+      if (err) {
+        console.log(err.message);
+        reject(err);
+      }
+      resolve(console.log(`Reset all condemnCnt in room_id: ${room}`));
+    })
+  })
 }
