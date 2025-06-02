@@ -6,10 +6,10 @@
 </head>
 
 <body>
-    <canvas id="draw_here" width="600" height="600" style="border:1px solid #000000;"></canvas>
+    <canvas id="draw_here" width="500" height="500" style="border:1px solid #000000;"></canvas>
     <div>
         <!--<p id="narration">{{narration}}</p>-->
-        <p id="narration">user was taking a stroll around the neighborhood when they fell onto someone's upturned rake and was left to marinate in their big pool of blood.</p>
+        <p id="narration">user was walking in the meadow on the hunt for a new pet goat when they fell onto someone's upturned rake and was left to marinate in their big pool of blood.</p>
     </div>
     <script>
         var narration = document.getElementById("narration");
@@ -19,35 +19,55 @@
         var context = drawing.getContext('2d');
 
         var image = new Image();
-        image.src = "./background.png";
+        
+        if (narration.includes("stroll around the neighborhood") || narration.includes("running through a big sunny field") || narration.includes("scouting out possible picnic spots") || narration.includes("cheerfully frolicking") || narration.includes("grandmother's huge garden") || narration.includes("half marathon") || narration.includes("walking in the meadow")) {
+            var img = "./background.png";
+        } else if (narration.includes("taking their dog for a walk")) {
+            var img = "./dog.png";
+        } else if (narration.includes("build up their bug collection")) {
+            var img = "./bug.png";
+        } else if (narration.includes("chase a pretty butterfly")) {
+            var img = "./butterfly.png";
+        }
+
+        image.src = img;
         image.crossOrigin = true;
         var intervalID = null;
         var row = 0;
         var col = 0;
 
-        if (narration.includes("running") || narration.includes("chase")) {
-          var speed = 500;
+        if (narration.includes("running") || narration.includes("chase") || narration.includes("marathon")) {
+          var speed = 75;
         } else {
-          var speed = 100;
+          var speed = 300;
         }
         image.onload = function () {
-            intervalID = setInterval(animate, speed);
+            intervalID = setInterval(animate, speed, 4, 3, 3);
             //context.drawImage(image, 1, 1, 400, 400, 0, 0, 500, 500);
         }
 
-        function animate() {
-            if (col === 3) {
+        function animate(rows, cols, endCol) {
+            if (col === cols) {
                 col = 0;
                 row += 1;
             }
             console.log(row, col);
-            if (row === 3 && col === 2) {
+            if (row === (rows-1) && col === (endCol-1)) {
                 clearInterval(intervalID);
             }
             context.clearRect(0, 0, 500, 500);
-            context.drawImage(image, 0+768*col, 0+768*row, 768, 768, 0, 0, 500, 500);
+            context.drawImage(image, 0+480*col, 0+480*row, 480, 480, 0, 0, 500, 500);
             col += 1;
         }
+        /*
+        row = 0;
+        col = 0;
+        image.src="./rake.png";
+        image.onload = function () {
+            intervalID = setInterval(animate, speed, 4, 4, 2);
+            //context.drawImage(image, 1, 1, 400, 400, 0, 0, 500, 500);
+        }
+        */
 
     </script>
 </body>
