@@ -9,7 +9,7 @@
     <canvas id="draw_here" width="500" height="500" style="border:1px solid #000000;"></canvas>
     <div>
         <!--<p id="narration">{{narration}}</p>-->
-        <p id="narration">user was walking in the meadow on the hunt for a new pet goat when they fell onto someone's upturned rake and was left to marinate in their big pool of blood.</p>
+        <p id="narration">user was walking in the meadow on the hunt for a new pet goat when they slipped on someone's puddle of oil and was left to marinate in their big pool of blood.</p>
     </div>
     <script>
         var narration = document.getElementById("narration");
@@ -19,22 +19,34 @@
         var context = drawing.getContext('2d');
 
         var image = new Image();
+        var img = [];
         
         if (narration.includes("stroll around the neighborhood") || narration.includes("running through a big sunny field") || narration.includes("scouting out possible picnic spots") || narration.includes("cheerfully frolicking") || narration.includes("grandmother's huge garden") || narration.includes("half marathon") || narration.includes("walking in the meadow")) {
-            var img = "./background.png";
+            img.push("./background.png");
         } else if (narration.includes("taking their dog for a walk")) {
-            var img = "./dog.png";
+            img.push("./dog.png");
         } else if (narration.includes("build up their bug collection")) {
-            var img = "./bug.png";
+            img.push("./bug.png");
         } else if (narration.includes("chase a pretty butterfly")) {
-            var img = "./butterfly.png";
+            img.push("./butterfly.png");
         }
 
-        image.src = img;
+        if (narration.includes("upturned rake")) {
+            img.push("./rake.png");
+        } else if (narration.includes("pet rock")) {
+            img.push("./rock.png");
+        } else if (narration.includes("puddle of oil")) {
+            img.push("./oil.png");
+        } else if (narration.includes("banana peel")) {
+            img.push("./banana.png");
+        }
+
+        image.src = img[0];
         image.crossOrigin = true;
         var intervalID = null;
         var row = 0;
         var col = 0;
+        var tracker = "background";
 
         if (narration.includes("running") || narration.includes("chase") || narration.includes("marathon")) {
           var speed = 75;
@@ -52,11 +64,24 @@
                 row += 1;
             }
             console.log(row, col);
-            if (row === (rows-1) && col === (endCol-1)) {
-                clearInterval(intervalID);
-            }
             context.clearRect(0, 0, 500, 500);
             context.drawImage(image, 0+480*col, 0+480*row, 480, 480, 0, 0, 500, 500);
+            if (row === (rows-1) && col === (endCol-1)) {
+                clearInterval(intervalID);
+                if (tracker === "background") {
+                    tracker = "action";
+                    image.src=img[1];
+                    image.onload = function() {
+                        row = 0;
+                        col = 0;
+                        intervalID = setInterval(animate, speed, 4, 4, 2);
+                    }
+                } else if (tracker === "action") {
+                    tracker = "result";
+                    speed = 300;
+                }
+            }
+            
             col += 1;
         }
         /*

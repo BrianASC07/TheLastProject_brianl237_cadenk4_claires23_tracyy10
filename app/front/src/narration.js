@@ -20,19 +20,19 @@ const action = [
   " fell onto someone's upturned rake",
   " tripped over someone's pet rock",
   //pit
-  " fell into a 6-foot pit that someone dug in the grass",
+  " slipped on someone's puddle of oil",
   " slipped on someone's banana peel",
-  " slipped on someone's Thomas the Train toy",
+  " slipped on someone's skateboard",
   " tripped over someone's pet duck",
   " fell onto someone's thorny pet plant",
   " tripped over someone's empty soda can",
   " tripped on someone's jack-o-lantern",
-  " tripped over someone's evil string"
+  " tripped over someone's piece of string"
 ]
 
 const result = [
   " and was left to marinate in their big pool of blood.",
-  " and hit their head a little too hard. :'(",
+  " and was left to slowly decompose.",
   " and never got up again."
 ]
 
@@ -43,7 +43,6 @@ const saved = [
 ]
 //mafia select self
 //cop message
-//animations---gif? video? pixels?
 //condemn animation
 //day cycle icon
 function randomInt(max) {
