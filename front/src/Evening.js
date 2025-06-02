@@ -61,7 +61,6 @@ export function Evening({ socket, username, room, role, spectator }) {
   })
 
   if (redirect && seconds < 10) {
-    socket.emit("test", condemned);
     return <Dusk socket={socket} username={username} room={room} role={role} spectator={spectator} condemn={condemned}/>
   }
 
