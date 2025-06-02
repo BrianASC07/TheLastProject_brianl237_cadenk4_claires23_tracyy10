@@ -60,7 +60,7 @@ export function Evening({ socket, username, room, role, spectator }) {
     setCondemned(data);
   })
 
-  if (redirect && seconds < 10) {
+  if (redirect && seconds < 1) {
     return <Dusk socket={socket} username={username} room={room} role={role} spectator={spectator} condemn={condemned}/>
   }
 

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Dawn } from './Dawn.js';
+import { Win } from './Win.js';
 
 export function Night({ socket, username, room, role, spectator }) {
   const [aliveUserList, setAliveUserList] = useState([]);
@@ -10,6 +11,7 @@ export function Night({ socket, username, room, role, spectator }) {
   const [seconds, setSeconds] = useState(15);
   const [redirect, setRedirect] = useState(false);
   const [redirectOnce, setRedirectOnce] = useState(true);
+  const [youWin, setYouWin] = useState(false);
 
   // https://react.dev/learn/synchronizing-with-effects#how-to-handle-the-effect-firing-twice-in-development
   // because of how useEffect runs their 'setup' code and 'cleanup' code, effects "running twice" often occur
@@ -36,6 +38,8 @@ export function Night({ socket, username, room, role, spectator }) {
     }
   }, [role, socket, target]);
 
+
+
   if (seconds <= 0) { // ends the night after timer is up
     // if (redirectOnce) {
     //   socket.emit("redirect_all_in_room", room);
@@ -55,6 +59,9 @@ export function Night({ socket, username, room, role, spectator }) {
   const options = async () => {
     await socket.emit("request_alive_userList", room);
     await socket.emit("request_spectating_userList", room);
+    if (seconds < 14) {
+      await socket.emit("get_all_mafia_in_room", room);
+    }
   };
 
   socket.on("user_alive_list", (data) => {
@@ -64,6 +71,16 @@ export function Night({ socket, username, room, role, spectator }) {
   socket.on("user_spectating_list", (data) => {
     setSpectatingUserList(data);
   });
+
+  socket.on("recieve_cnt_mafia", (data) => {
+    if (data === 0) {
+      setYouWin(true);
+    }
+  })
+
+  if (youWin) {
+    return <Win socket={ socket } username={ username} room={room}/>
+  }
 
   const message = () => {
     if (target !== "") {

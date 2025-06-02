@@ -166,6 +166,15 @@ io.on("connection", (socket) => { // whenever a connection to the serve is detec
     socket.to(data).emit("redirect", true);
   })
 
+
+  socket.on("get_all_mafia_in_room", (data) => {
+    (async() => {
+      try {
+        socket.emit("recieve_cnt_mafia", await get_how_many_role_in_room("mafia", data));
+      } catch (error) {};
+    })();
+  });
+
   socket.on("disconnect", () => {
     (async () => { try { await remove_from_room(socket.id) } catch (error) { } })();
     console.log("User disconnected: ", socket.id) // listens to disconnects from the server
@@ -399,20 +408,6 @@ function get_highest_condemn(room) {
       })
       console.log(ret);
       resolve(ret);
-      // if (rows[0].condemnCnt === 0) { // if no one was voted
-      //   console.log("THIIS HAPPENED!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-      //   resolve("");
-      // }
-      // else if (rows.length > 1) { // if tie
-      //   if (rows[0].condemnCnt === rows[1].condemnCnt) {
-      //     console.log("THIIS HAPPENED@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
-      //     resolve("");
-      //   }
-      // }
-      // else {
-      //   console.log("THIIS HAPPENED=========================================");
-      //   resolve(rows[0].username);
-      // }
     });
     close(db);
   });
@@ -429,4 +424,22 @@ function reset_condemn_cnt(room) {
       resolve(console.log(`Reset all condemnCnt in room_id: ${room}`));
     })
   })
+}
+
+function get_how_many_role_in_room(role, room) {
+  const db = connect();
+  return new Promise((resolve, reject) => {
+    db.all("SELECT role FROM rooms WHERE room_id = ? AND role = ? AND spectating = ?", [room, role, 0], (err, rows) => {
+      if (err) {
+        console.log(err.message);
+        reject(err);
+      }
+      const ret = []
+      if (rows !== undefined) {
+        rows.forEach(value => ret.push(value.role));
+      }
+      resolve(ret.length);
+    });
+    close(db);
+  });
 }

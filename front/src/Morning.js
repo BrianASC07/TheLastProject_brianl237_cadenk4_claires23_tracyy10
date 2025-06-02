@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Evening } from './Evening.js';
+import { Win } from './Win.js';
 
 export function Morning({ socket, username, room, role, spectator }) {
     const [currentMessage, setCurrentMessage] = useState(""); // use setCurrentMessage to update var currentMessage
@@ -11,6 +12,7 @@ export function Morning({ socket, username, room, role, spectator }) {
     const [roleDescription, setRoleDescription] = useState("");
     const [redirect, setRedirect] = useState(false);
     const [redirectOnce, setRedirectOnce] = useState(true);
+    const [youWin, setYouWin] = useState(false);
 
     useEffect(() => { // timer ticks down every second
         return () => {
@@ -62,6 +64,7 @@ export function Morning({ socket, username, room, role, spectator }) {
     const options = async () => {
         await socket.emit("request_alive_userList", room);
         await socket.emit("request_spectating_userList", room);
+        await socket.emit("get_all_mafia_in_room", room);
     };
 
     socket.on("user_alive_list", (data) => {
@@ -71,6 +74,16 @@ export function Morning({ socket, username, room, role, spectator }) {
     socket.on("user_spectating_list", (data) => {
         setSpectatingUserList(data);
     });
+
+    socket.on("recieve_cnt_mafia", (data) => {
+      if (data === 0) {
+        setYouWin(true);
+      }
+    });
+
+    if (youWin) {
+      return <Win socket={ socket } username={ username} room={room}/>
+    }
 
     function description(role) {
         setCheckRole(true);

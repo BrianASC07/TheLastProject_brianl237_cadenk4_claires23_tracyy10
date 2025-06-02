@@ -41,12 +41,11 @@ export function Dusk({ socket, username, room, role, spectator, condemn}) {
         } catch (error) { };
       })();
     }
-    
+
     // if (redirectOnce) {
     //   socket.emit("redirect_all_in_room", room);
     //   setRedirectOnce(false);
     // }
-
     return <Night socket={socket} username={username} room={room} role={role} spectator={isSpectator} />
   }
 
@@ -126,7 +125,6 @@ export function Dusk({ socket, username, room, role, spectator, condemn}) {
     <div>
       {/* constant() */}
       <p> dusk </p>
-      <p> this is who {condemn} </p>
       {seconds}
 
       <p> {show_condemned()} </p>
