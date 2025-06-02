@@ -20,7 +20,7 @@
 
         var image = new Image();
         var img = [];
-        
+
         if (narration.includes("stroll around the neighborhood") || narration.includes("running through a big sunny field") || narration.includes("scouting out possible picnic spots") || narration.includes("cheerfully frolicking") || narration.includes("grandmother's huge garden") || narration.includes("half marathon") || narration.includes("walking in the meadow")) {
             img.push("./background.png");
         } else if (narration.includes("taking their dog for a walk")) {
@@ -39,6 +39,12 @@
             img.push("./oil.png");
         } else if (narration.includes("banana peel")) {
             img.push("./banana.png");
+        } else if (narration.includes("skateboard")) {
+            img.push("./skateboard.png");
+        } else if (narration.includes("pet duck")) {
+            img.push("./duck.png");
+        } else if (narration.includes("thorny pet plant")) {
+            img.push("./cactus.png");
         }
 
         image.src = img[0];
@@ -81,7 +87,7 @@
                     speed = 300;
                 }
             }
-            
+
             col += 1;
         }
         /*
