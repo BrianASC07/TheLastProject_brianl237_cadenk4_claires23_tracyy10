@@ -1,22 +1,34 @@
 import React, { useEffect, useState } from "react";
-import { Morning } from './Morning.js';
+import { Dusk } from './Dusk.js';
 
-export function Dawn({ socket, username, room, role, spectator }) {
-  const [useOnce, setUseOnce] = useState(true);
-  const [actOnce, setActOnce] = useState(true);
-  const [forCop, setForCop] = useState(true);
+export function Evening({ socket, username, room, role, spectator }) {
   const [aliveUserList, setAliveUserList] = useState([]);
   const [spectatingUserList, setSpectatingUserList] = useState([]);
   const [checkRole, setCheckRole] = useState(false);
   const [roleDescription, setRoleDescription] = useState("");
-  const [mafiaTarget, setMafiaTarget] = useState("");
-  const [doctorTarget, setDoctorTarget] = useState("");
-  const [copTarget, setCopTarget] = useState("");
   const [seconds, setSeconds] = useState(15);
-  const [isSpectator, setIsSpectator] = useState(spectator);
-  const [copMessage, setCopMessage] = useState("");
+  const [target, setTarget] = useState("");
+  const [doOnce, setDoOnce] = useState(true);
+  const [idiotTriedToVote, setIdiotTriedToVote] = useState("");
   const [redirect, setRedirect] = useState(false);
   const [redirectOnce, setRedirectOnce] = useState(true);
+  const [condemned, setCondemned] = useState("");
+
+  const picked_who = () => {
+    if (target !== "" && spectator === false) {
+      return <p> You have voted for {target} to be condemned to death! </p>
+    }
+    return <p> Who do you think is the most suspicious? </p>
+  }
+
+  const vote = (uname) => {
+    if (spectator === false) {
+      setTarget(uname);
+    }
+    else {
+      setIdiotTriedToVote("You may not vote, you are dead.");
+    }
+  }
 
   useEffect(() => { // timer ticks down every second
     return () => {
@@ -26,87 +38,36 @@ export function Dawn({ socket, username, room, role, spectator }) {
     }
   }, []);
 
-  useEffect(() => {
-    if (username === mafiaTarget && mafiaTarget !== doctorTarget) {
-      setIsSpectator(true);
-    }
-  }, [mafiaTarget, doctorTarget]);
-
   if (seconds <= 0) { // ends the night after timer is up
-    if (redirectOnce) {
+    if (doOnce && target !== "") {
+      (async () => {
+        try {
+          await socket.emit("update_condemnCnt", [target, room]);
+          await socket.emit("get_condemned", room);
+          setDoOnce(false);
+        } catch (error) { };
+      })();
+    }
+
+    if (redirectOnce && doOnce == false) {
       socket.emit("redirect_all_in_room", room);
       setRedirectOnce(false);
     }
+    // return <Dusk socket={socket} username={username} room={room} role={role} spectator={spectator} />
   }
 
+  socket.on("return_condemned", (data) => {
+    setCondemned(data);
+  })
+
   if (redirect && seconds < 10) {
-    return <Morning socket={socket} username={username} room={room} role={role} spectator={isSpectator} />
+    socket.emit("test", condemned);
+    return <Dusk socket={socket} username={username} room={room} role={role} spectator={spectator} condemn={condemned}/>
   }
 
   socket.on("redirect", (data) => {
     setRedirect(data);
   });
-
-  if (useOnce) { // grab the targets from backend once
-    socket.emit("get_mafia", "");
-    socket.emit("get_doctor", "");
-    socket.emit("get_cop", "");
-    setUseOnce(false);
-  }
-
-  socket.on("recieve_mafia", (data) => {
-    setMafiaTarget(data);
-  });
-  socket.on("recieve_doctor", (data) => {
-    setDoctorTarget(data);
-  });
-  socket.on("recieve_cop", (data) => {
-    setCopTarget(data);
-  });
-
-  if (forCop && copTarget !== "") { // doesn't need to be in this if-statement, i just don't want it running eternally....
-    (async () => {
-      try {
-        socket.emit("get_role", [copTarget, room]);
-      } catch (error) { };
-    })();
-    setForCop(false);
-  }
-
-  socket.on("return_role", (data) => {
-    setCopMessage(data);
-  });
-
-  const ifCop = () => {
-    if (role === "cop" && copTarget !== "") {
-      return `You snuck out in the dead of night to investigate ${copTarget}, and found that they are the ${copMessage}!`;
-    }
-    return "";
-  }
-
-  const kill = async (target, room) => { // removes the target from socket room and database
-    if (actOnce) {
-      await socket.emit("kill_user", [target, room]);
-      if (username === mafiaTarget) {
-      }
-      setActOnce(false);
-    }
-  };
-
-  // IF MAFIA == DOCTOR --> NO KILL + ANIMATION
-  if (mafiaTarget === doctorTarget) {
-    // no kill...
-  }
-
-  // IF MAFIA == MAFIA --> KILL MAFIA target + ANIMATION
-  else if (mafiaTarget === username && role === "mafia") {
-    kill(mafiaTarget, room);
-  }
-
-  // IF MAFIA != DOCTOR --> KILL MAFIA target + ANIMATION
-  else if (mafiaTarget !== doctorTarget) {
-    kill(mafiaTarget, room);
-  }
 
   const options = async () => {
     await socket.emit("request_alive_userList", room);
@@ -175,12 +136,17 @@ export function Dawn({ socket, username, room, role, spectator }) {
   return (
     <div>
       {/* constant() */}
-      <p> dawn </p>
+      <p> evening </p>
       {seconds}
 
-      <p> {ifCop() } </p>
+      <p> CONDEMN </p>
+      {aliveUserList.map((uname, index) => {
+        return [<p> {uname} <button onClick={() => vote(uname)}> 💀 </button></p>];
+      })}
+      <p> {picked_who()} </p>
+      <p> {idiotTriedToVote} </p>
     </div>
   )
 }
 
-export default Dawn
+export default Evening
