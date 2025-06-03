@@ -123,7 +123,7 @@ export function Dusk({ socket, username, room, role, spectator, condemn}) {
   options();
   return (
     <div>
-      {/* constant() */}
+      { constant() }
       <p> dusk </p>
       {seconds}
 

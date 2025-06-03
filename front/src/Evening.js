@@ -134,7 +134,7 @@ export function Evening({ socket, username, room, role, spectator }) {
   options();
   return (
     <div>
-      {/* constant() */}
+      { constant() }
       <p> evening </p>
       {seconds}
 

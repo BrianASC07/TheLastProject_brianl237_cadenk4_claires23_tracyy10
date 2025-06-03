@@ -138,7 +138,7 @@ export function Morning({ socket, username, room, role, spectator }) {
     options();
     return (
         <div>
-            {/* constant() */}
+            { constant() }
             <div className="chat-window">
                 <div className="chat-header">
                     <p> chat header!!! </p>

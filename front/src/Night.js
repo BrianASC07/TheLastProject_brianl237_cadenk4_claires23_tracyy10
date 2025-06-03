@@ -159,7 +159,7 @@ export function Night({ socket, username, room, role, spectator }) {
         {constant()}
         <p> Select a target: </p>
         {aliveUserList.map((uname, index) => {
-          if (username !== uname || role === "doctor" || role === "mafia") {
+          if (username !== uname || role === "doctor") {
             return <button onClick={() => setTarget(uname)}> {uname} </button>
           }
           else { return "" }
@@ -180,9 +180,8 @@ export function Night({ socket, username, room, role, spectator }) {
   else {
     return ( // innocent
       <div>
-        {/* constant() */}
+        { constant() }
         <p> night </p>
-        {seconds}
       </div>
     );
   }

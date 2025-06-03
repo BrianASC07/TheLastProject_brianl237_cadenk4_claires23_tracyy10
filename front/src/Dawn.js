@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Morning } from './Morning.js';
+import { script } from './Narration.js';
+import { Canvas } from './Animation.js';
 
 export function Dawn({ socket, username, room, role, spectator }) {
   const [useOnce, setUseOnce] = useState(true);
@@ -17,6 +19,7 @@ export function Dawn({ socket, username, room, role, spectator }) {
   const [copMessage, setCopMessage] = useState("");
   const [redirect, setRedirect] = useState(false);
   const [redirectOnce, setRedirectOnce] = useState(true);
+  const [narration, setNarration] = useState("");
 
   useEffect(() => { // timer ticks down every second
     return () => {
@@ -96,16 +99,19 @@ export function Dawn({ socket, username, room, role, spectator }) {
   // IF MAFIA == DOCTOR --> NO KILL + ANIMATION
   if (mafiaTarget === doctorTarget) {
     // no kill...
+    setNarration(script(mafiaTarget, false));
   }
 
-  // IF MAFIA == MAFIA --> KILL MAFIA target + ANIMATION
-  else if (mafiaTarget === username && role === "mafia") {
-    kill(mafiaTarget, room);
-  }
+  // no more suicide :')'
+  // // IF MAFIA == MAFIA --> KILL MAFIA target + ANIMATION
+  // else if (mafiaTarget === username && role === "mafia") {
+  //   kill(mafiaTarget, room);
+  // }
 
   // IF MAFIA != DOCTOR --> KILL MAFIA target + ANIMATION
   else if (mafiaTarget !== doctorTarget) {
     kill(mafiaTarget, room);
+    setNarration(script(mafiaTarget, true));
   }
 
   const options = async () => {
@@ -174,10 +180,9 @@ export function Dawn({ socket, username, room, role, spectator }) {
   options();
   return (
     <div>
-      {/* constant() */}
+      { constant() }
       <p> dawn </p>
-      {seconds}
-
+      { Canvas(narration) }
       <p> {ifCop() } </p>
     </div>
   )
