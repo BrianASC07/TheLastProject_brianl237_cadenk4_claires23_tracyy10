@@ -9,7 +9,7 @@
     <canvas id="draw_here" width="500" height="500" style="border:1px solid #000000;"></canvas>
     <div>
         <!--<p id="narration">{{narration}}</p>-->
-        <p id="narration">user was walking in the meadow on the hunt for a new pet goat when they slipped on someone's puddle of oil and was left to marinate in their big pool of blood.</p>
+        <p id="narration">user was walking in the meadow on the hunt for a new pet goat when they almost tripped over someone's pet duck, but then someone screamed "WATCH OUT!!!" just in time to end up saving their life.</p>
     </div>
     <script>
         var narration = document.getElementById("narration");
@@ -45,6 +45,27 @@
             img.push("./duck.png");
         } else if (narration.includes("thorny pet plant")) {
             img.push("./cactus.png");
+        } else if (narration.includes("empty soda can")) {
+            img.push("./soda.png");
+        } else if (narration.includes("jack-o-lantern")) {
+            img.push("./pumpkin.png");
+        } else if (narration.includes("piece of string")) {
+            img.push("./string.png");
+        }
+
+        var dead = true;
+        if (narration.includes("pool of blood")) {
+            img.push("./blood.png");
+        } else if (narration.includes("slowly decompose")) {
+            img.push("./rot.png");
+        } else if (narration.includes("never got up")) {
+            img.push("./dead.png");
+        } else if (narration.includes("freshly baked cookies")) {
+            dead = false;
+            img.push("./cookie.png");
+        } else {
+            dead = false;
+            img.push("./exclaim.png");
         }
 
         image.src = img[0];
@@ -80,11 +101,25 @@
                     image.onload = function() {
                         row = 0;
                         col = 0;
-                        intervalID = setInterval(animate, speed, 4, 4, 2);
+                        if (dead) {
+                            intervalID = setInterval(animate, speed, 4, 4, 2);
+                        } else {
+                            intervalID = setInterval(animate, speed, 3, 4, 2);
+                        }
                     }
                 } else if (tracker === "action") {
                     tracker = "result";
                     speed = 300;
+                    image.src=img[2];
+                    image.onload = function() {
+                        row = 0;
+                        col = 0;
+                        if (dead) {
+                            intervalID = setInterval(animate, speed, 3, 2, 1);
+                        } else {
+                            intervalID = setInterval(animate, speed, 4, 3, 2);
+                        }
+                    }
                 }
             }
 
