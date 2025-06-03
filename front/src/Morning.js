@@ -5,7 +5,7 @@ import { Win } from './Win.js';
 export function Morning({ socket, username, room, role, spectator }) {
     const [currentMessage, setCurrentMessage] = useState(""); // use setCurrentMessage to update var currentMessage
     const [messageList, setMessageList] = useState([]);
-    const [seconds, setSeconds] = useState(15);
+    const [seconds, setSeconds] = useState(10);
     const [aliveUserList, setAliveUserList] = useState([]);
     const [spectatingUserList, setSpectatingUserList] = useState([]);
     const [checkRole, setCheckRole] = useState(false);
@@ -53,7 +53,7 @@ export function Morning({ socket, username, room, role, spectator }) {
         // return <Evening socket={socket} username={username} room={room} role={role} spectator={spectator} />
     }
 
-    if (redirect && seconds < 10) {
+    if (redirect && seconds < 1) {
         return <Evening socket={socket} username={username} room={room} role={role} spectator={spectator} />
     }
 

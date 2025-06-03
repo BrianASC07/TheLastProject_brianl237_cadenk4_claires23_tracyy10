@@ -345,7 +345,10 @@ function get_user_id(username, room) {
         console.log(err.message);
         reject(err);
       }
-      resolve(rows.user_id);
+      if (typeof(rows) !== undefined) {
+        resolve(rows.userID);
+      }
+      resolve(console.log("Row 351 unidentified error (timing misaligned, most likely)"));
     });
     close(db);
   });

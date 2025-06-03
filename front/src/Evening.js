@@ -6,7 +6,7 @@ export function Evening({ socket, username, room, role, spectator }) {
   const [spectatingUserList, setSpectatingUserList] = useState([]);
   const [checkRole, setCheckRole] = useState(false);
   const [roleDescription, setRoleDescription] = useState("");
-  const [seconds, setSeconds] = useState(15);
+  const [seconds, setSeconds] = useState(10);
   const [target, setTarget] = useState("");
   const [doOnce, setDoOnce] = useState(true);
   const [idiotTriedToVote, setIdiotTriedToVote] = useState("");

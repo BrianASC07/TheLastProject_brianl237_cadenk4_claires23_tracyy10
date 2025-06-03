@@ -12,7 +12,7 @@ export function Dawn({ socket, username, room, role, spectator }) {
   const [mafiaTarget, setMafiaTarget] = useState("");
   const [doctorTarget, setDoctorTarget] = useState("");
   const [copTarget, setCopTarget] = useState("");
-  const [seconds, setSeconds] = useState(15);
+  const [seconds, setSeconds] = useState(5);
   const [isSpectator, setIsSpectator] = useState(spectator);
   const [copMessage, setCopMessage] = useState("");
   const [redirect, setRedirect] = useState(false);
@@ -39,7 +39,7 @@ export function Dawn({ socket, username, room, role, spectator }) {
     }
   }
 
-  if (redirect && seconds < 10) {
+  if (redirect && seconds < 1) {
     return <Morning socket={socket} username={username} room={room} role={role} spectator={isSpectator} />
   }
 

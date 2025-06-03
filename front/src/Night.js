@@ -8,7 +8,7 @@ export function Night({ socket, username, room, role, spectator }) {
   const [target, setTarget] = useState("");
   const [checkRole, setCheckRole] = useState(false);
   const [roleDescription, setRoleDescription] = useState("");
-  const [seconds, setSeconds] = useState(15);
+  const [seconds, setSeconds] = useState(10);
   const [redirect, setRedirect] = useState(false);
   const [redirectOnce, setRedirectOnce] = useState(true);
   const [youWin, setYouWin] = useState(false);
@@ -48,7 +48,7 @@ export function Night({ socket, username, room, role, spectator }) {
     return <Dawn socket={socket} username={username} room={room} role={role} spectator={spectator} />
   }
 
-  // if (redirect && seconds < 10) {
+  // if (redirect && seconds < 1) {
   //   return <Dawn socket={socket} username={username} room={room} role={role} spectator={spectator} />
   // }
 

@@ -6,7 +6,7 @@ export function Dusk({ socket, username, room, role, spectator, condemn}) {
   const [spectatingUserList, setSpectatingUserList] = useState([]);
   const [checkRole, setCheckRole] = useState(false);
   const [roleDescription, setRoleDescription] = useState("");
-  const [seconds, setSeconds] = useState(15);
+  const [seconds, setSeconds] = useState(10);
   const [isSpectator, setIsSpectator] = useState(spectator);
   const [doOnce2, setDoOnce2] = useState(true);
   const [redirect, setRedirect] = useState(false);
@@ -49,7 +49,7 @@ export function Dusk({ socket, username, room, role, spectator, condemn}) {
     return <Night socket={socket} username={username} room={room} role={role} spectator={isSpectator} />
   }
 
-  // if (redirect && seconds < 10) {
+  // if (redirect && seconds < 1) {
   //   return <Night socket={socket} username={username} room={room} role={role} spectator={isSpectator} />
   // }
 

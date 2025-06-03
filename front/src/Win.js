@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { JoinRoom } from './JoinRoom.js';
 
 export function Win({socket, username, room}) {
-  const [seconds, setSeconds] = useState(3);
+  const [seconds, setSeconds] = useState(5);
 
   useEffect(() => { // timer ticks down every second
     return () => {
@@ -14,6 +14,7 @@ export function Win({socket, username, room}) {
 
   if (seconds <= 0) {
     socket.emit("force_disconnect", [username, room]);
+    window.location.reload();
     return <JoinRoom socket={socket}/>
   }
 
