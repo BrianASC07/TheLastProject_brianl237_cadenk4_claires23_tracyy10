@@ -72,15 +72,18 @@ tracyY --2025-05-30 X:XX
 - waiting room now shows how many members (and who) are in the room
 - working on evening and dusk
 
-tracyY --2025-06-01
+tracyY --2025-06-01 X:XX
 - finished evening
 - finished dusk
 - condemn is working (slight problem with timing but uhhh you'll see)
 - found that all the async functions was making the pages not synced (duh) but that means some code would run multiple times and mess it up for the condemn, especially. So I added in on some pages a re-align block...
 
-cadenK -- 2025-06-01 
+cadenK -- 2025-06-01 X:XX
 - Moved over CSS from game.html to the actual functioning game
 - Added flash messages for full room and spectators
+
+tracyY --2025-06-03 12:37
+- Win conditions added
 
 JavaScript style revisions 5/23:
  - the biggest issue is most likely with the usage of arrow functions instead of function declarations even when they are not necessary, such as in App.js. If time allows, we will likely go through the code and clean up functions as needed
