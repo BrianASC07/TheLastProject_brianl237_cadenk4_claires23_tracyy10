@@ -11,6 +11,13 @@ var mafiaSelect = "";
 var doctorSelect = "";
 var copSelect = "";
 
+const phases = [
+  { name: "Night", duration: 15 },
+  { name: "Dawn", duration: 6 },
+  { name: "Morning", duration: 20 },
+  { name: "Evening", duration: 15 },
+  { name: "Dusk", duration: 7 },
+];
 
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -49,7 +56,37 @@ io.on("connection", (socket) => { // whenever a connection to the serve is detec
     socket.to(data.room).emit("receive_message", data); // calls the receive_message func in the frontend file
     // emits the message only to the people in that room
   });
+  
+  socket.on("start_timer", (data) => {
+    (async () => {
+      try {
+        let phaseIndex = await get_room_phase(data)
+        let phaseName = phases[phaseIndex].name
+        let timeLeft = phases[phaseIndex].duration;
 
+        io.to(data).emit("time_update", {timeLeft, phaseIndex});
+
+        setInterval(() => {
+          timeLeft -= 1;
+
+          io.to(data).emit("time_update", {timeLeft, phaseIndex});
+          
+          //move into next phase
+          if (timeLeft <= 0) {
+            phaseIndex = (phaseIndex + 1) % phases.length;
+            const db = connect();
+            db.run("UPDATE rooms SET phase = ? WHERE room_id = ?", [phaseIndex, data]);
+            db.close()
+            timeLeft = phases[phaseIndex].duration;
+
+            io.to(data).emit("time_update", {timeLeft, phaseIndex});
+          }
+        }, 1000);
+      
+      } catch (error) { }
+    })()
+  });
+  
   socket.on("request_userList", (data) => {
     (async () => {
       try {
@@ -171,9 +208,9 @@ io.on("connection", (socket) => { // whenever a connection to the serve is detec
     console.log("User disconnected: ", socket.id) // listens to disconnects from the server
   });
 
-  socket.on("test", (data) => {
-    console.log(`!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ${data}`);
-  })
+  // socket.on("test", (data) => {
+  //   console.log(`!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ${data}`);
+  // })
 });
 
 server.listen(3001, () => { // run 'npm start'
@@ -207,7 +244,7 @@ function createTable() {
   const db = connect();
   return new Promise((resolve, reject) => {
     const tables = `
-      CREATE TABLE IF NOT EXISTS rooms(user_id TEXT, room_id TEXT, role TEXT, username TEXT, spectating REAL, condemnCnt REAL);
+      CREATE TABLE IF NOT EXISTS rooms(user_id TEXT, room_id TEXT, role TEXT, username TEXT, spectating REAL, condemnCnt REAL, phase REAL);
     `;
     db.run(tables, (err) => {
       if (err) {
@@ -236,7 +273,7 @@ function pick_role(in_room) {
 function add_to_room(user_id, room_id, role, username, socket) {
   const db = connect();
   return new Promise((resolve, reject) => {
-    db.run("INSERT INTO rooms (user_id, room_id, role, username, spectating, condemnCnt) VALUES (?, ?, ?, ?, ?, ?)", [user_id, room_id, role, username, 0, 0], (err) => {
+    db.run("INSERT INTO rooms (user_id, room_id, role, username, spectating, condemnCnt, phase) VALUES (?, ?, ?, ?, ?, ?, ?)", [user_id, room_id, role, username, 0, 0, 0], (err) => {
       if (err) {
         console.log(err.message);
         reject(err);
@@ -247,6 +284,49 @@ function add_to_room(user_id, room_id, role, username, socket) {
     close(db);
   });
 }
+
+function get_room_phase(room) {
+  const db = connect();
+  return new Promise((resolve, reject) => {
+    db.get("SELECT phase FROM rooms WHERE room_id = ?", [room], (err, rows) => {
+      if (err) {
+        console.log(err.message);
+        reject(err);
+      }
+      resolve(rows.phase);
+    });
+    close(db);
+  });
+}
+
+async function room_timer(room) {
+  const db = connect();
+  let phaseIndex = await get_room_phase(room)
+  console.log("this is the phase index: " + phaseIndex)
+  let timeLeft = phases[phaseIndex].duration;
+
+  socket.to(room).emit("time_update", {timeLeft});
+
+  //Set Interval
+  setInterval(() => {
+    timeLeft -= 1;
+
+    // Broadcast time update
+    socket.to(room).emit("time_update", {timeLeft});
+
+    if (timeLeft <= 0) {
+      // Move to next phase
+      phaseIndex = (phaseIndex + 1) % phases.length;
+      db.run("UPDATE rooms SET phase = ? WHERE room_id = ?", [phaseIndex, room]);
+      timeLeft = phases[phaseIndex].duration;
+
+      // Broadcast new phase
+      socket.to(room).emit("time_update", {timeLeft});
+    }
+  }, 1000);
+  db.close()
+}
+
 
 function get_roles_in_room(room) { // returns an array of roles in a given room
   const db = connect();
