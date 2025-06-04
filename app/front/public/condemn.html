@@ -19,15 +19,10 @@
         var intervalID = null;
         var row = 0;
         var col = 0;
-        var tracker = "background";
+        var speed = 300;
 
-        if (narration.includes("running") || narration.includes("chase") || narration.includes("marathon")) {
-          var speed = 75;
-        } else {
-          var speed = 300;
-        }
         image.onload = function () {
-            intervalID = setInterval(animate, speed, 4, 3, 3);
+            intervalID = setInterval(animate, speed, 5, 5, 2);
             //context.drawImage(image, 1, 1, 400, 400, 0, 0, 500, 500);
         }
 
@@ -41,32 +36,6 @@
             context.drawImage(image, 0+480*col, 0+480*row, 480, 480, 0, 0, 500, 500);
             if (row === (rows-1) && col === (endCol-1)) {
                 clearInterval(intervalID);
-                if (tracker === "background") {
-                    tracker = "action";
-                    image.src=img[1];
-                    image.onload = function() {
-                        row = 0;
-                        col = 0;
-                        if (dead) {
-                            intervalID = setInterval(animate, speed, 4, 4, 2);
-                        } else {
-                            intervalID = setInterval(animate, speed, 3, 4, 2);
-                        }
-                    }
-                } else if (tracker === "action") {
-                    tracker = "result";
-                    speed = 300;
-                    image.src=img[2];
-                    image.onload = function() {
-                        row = 0;
-                        col = 0;
-                        if (dead) {
-                            intervalID = setInterval(animate, speed, 3, 2, 1);
-                        } else {
-                            intervalID = setInterval(animate, speed, 4, 3, 2);
-                        }
-                    }
-                }
             }
 
             col += 1;
