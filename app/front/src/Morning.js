@@ -1,24 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { Evening } from './Evening.js';
 
-export function Morning({ socket, username, room, role, spectator }) {
+export function Morning({ socket, username, room, role, spectator, onPhaseChange, seconds }) {
     const [currentMessage, setCurrentMessage] = useState(""); // use setCurrentMessage to update var currentMessage
     const [messageList, setMessageList] = useState([]);
-    const [seconds, setSeconds] = useState(15);
     const [aliveUserList, setAliveUserList] = useState([]);
     const [spectatingUserList, setSpectatingUserList] = useState([]);
     const [checkRole, setCheckRole] = useState(false);
     const [roleDescription, setRoleDescription] = useState("");
     const [redirect, setRedirect] = useState(false);
     const [redirectOnce, setRedirectOnce] = useState(true);
-
-    useEffect(() => { // timer ticks down every second
-        return () => {
-            setInterval(() => {
-                setSeconds(prevSeconds => prevSeconds - 1);
-            }, 1000); // 1000 ms -> s
-        }
-    }, []);
 
     const sendMessage = async () => { // ASYNC causes this function to wait for the AWAIT statement to be finished (a new message is sent) before it runs (otherwise the data required to complete this func would be missing)
         if (currentMessage !== "" && spectator === false) { // cannot send empty messages
@@ -42,23 +32,7 @@ export function Morning({ socket, username, room, role, spectator }) {
             setMessageList((list) => [...list, data]); // appends data (new message) to the current messageList
         });
     }, [socket]);
-
-    if (seconds <= 0) { // ends the night after timer is up
-        if (redirectOnce) {
-            socket.emit("redirect_all_in_room", room);
-            setRedirectOnce(false);
-        }
-        // return <Evening socket={socket} username={username} room={room} role={role} spectator={spectator} />
-    }
-
-    if (redirect && seconds < 10) {
-        return <Evening socket={socket} username={username} room={room} role={role} spectator={spectator} />
-    }
-
-    socket.on("redirect", (data) => {
-        setRedirect(data);
-    });
-
+    
     const options = async () => {
         await socket.emit("request_alive_userList", room);
         await socket.emit("request_spectating_userList", room);

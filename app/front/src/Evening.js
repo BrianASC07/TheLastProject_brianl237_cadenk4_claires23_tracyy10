@@ -1,18 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { Dusk } from './Dusk.js';
 
-export function Evening({ socket, username, room, role, spectator }) {
+export function Evening({ socket, username, room, role, spectator, seconds, condemned, setCondemned}) {
   const [aliveUserList, setAliveUserList] = useState([]);
   const [spectatingUserList, setSpectatingUserList] = useState([]);
   const [checkRole, setCheckRole] = useState(false);
   const [roleDescription, setRoleDescription] = useState("");
-  const [seconds, setSeconds] = useState(15);
   const [target, setTarget] = useState("");
   const [doOnce, setDoOnce] = useState(true);
   const [idiotTriedToVote, setIdiotTriedToVote] = useState("");
   const [redirect, setRedirect] = useState(false);
   const [redirectOnce, setRedirectOnce] = useState(true);
-  const [condemned, setCondemned] = useState("");
 
   const picked_who = () => {
     if (target !== "" && spectator === false) {
@@ -30,14 +27,6 @@ export function Evening({ socket, username, room, role, spectator }) {
     }
   }
 
-  useEffect(() => { // timer ticks down every second
-    return () => {
-      setInterval(() => {
-        setSeconds(prevSeconds => prevSeconds - 1);
-      }, 1000); // 1000 ms -> s
-    }
-  }, []);
-
   if (seconds <= 0) { // ends the night after timer is up
     if (doOnce && target !== "") {
       (async () => {
@@ -49,25 +38,11 @@ export function Evening({ socket, username, room, role, spectator }) {
       })();
     }
 
-    if (redirectOnce && doOnce == false) {
-      socket.emit("redirect_all_in_room", room);
-      setRedirectOnce(false);
-    }
-    // return <Dusk socket={socket} username={username} room={room} role={role} spectator={spectator} />
   }
 
   socket.on("return_condemned", (data) => {
     setCondemned(data);
   })
-
-  if (redirect && seconds < 10) {
-    socket.emit("test", condemned);
-    return <Dusk socket={socket} username={username} room={room} role={role} spectator={spectator} condemn={condemned}/>
-  }
-
-  socket.on("redirect", (data) => {
-    setRedirect(data);
-  });
 
   const options = async () => {
     await socket.emit("request_alive_userList", room);

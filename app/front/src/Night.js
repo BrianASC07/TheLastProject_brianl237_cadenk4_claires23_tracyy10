@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { Dawn } from './Dawn.js';
 
 const styles = {
   container: {
@@ -110,20 +109,13 @@ const styles = {
   },
 };
 
-export function Night({ socket, username, room, role, spectator }) {
+export function Night({ socket, username, room, role, spectator, seconds }) {
   const [aliveUserList, setAliveUserList] = useState([]);
   const [spectatingUserList, setSpectatingUserList] = useState([]);
   const [target, setTarget] = useState("");
   const [checkRole, setCheckRole] = useState(false);
   const [roleDescription, setRoleDescription] = useState("");
-  const [seconds, setSeconds] = useState(15);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setSeconds(prevSeconds => prevSeconds - 1);
-    }, 1000);
-    return () => clearInterval(interval);
-  }, []);
 
   useEffect(() => {
     if (role === 'mafia') socket.emit("set_mafia", target);
@@ -146,10 +138,6 @@ export function Night({ socket, username, room, role, spectator }) {
       socket.off("user_spectating_list", handleSpectating);
     };
   }, [socket, room]);
-
-  if (seconds <= 0) {
-    return <Dawn socket={socket} username={username} room={room} role={role} spectator={spectator} />
-  }
 
   function message() {
     if (target !== "") {

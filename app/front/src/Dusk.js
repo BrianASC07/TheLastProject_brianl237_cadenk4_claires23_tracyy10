@@ -1,24 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { Night } from './Night.js';
 
-export function Dusk({ socket, username, room, role, spectator, condemn}) {
+export function Dusk({ socket, username, room, role, spectator, seconds, condemn, setCondemned}) {
   const [aliveUserList, setAliveUserList] = useState([]);
   const [spectatingUserList, setSpectatingUserList] = useState([]);
   const [checkRole, setCheckRole] = useState(false);
   const [roleDescription, setRoleDescription] = useState("");
-  const [seconds, setSeconds] = useState(15);
   const [isSpectator, setIsSpectator] = useState(spectator);
   const [doOnce2, setDoOnce2] = useState(true);
   const [redirect, setRedirect] = useState(false);
   const [redirectOnce, setRedirectOnce] = useState(true);
-
-  useEffect(() => { // timer ticks down every second
-    return () => {
-      setInterval(() => {
-        setSeconds(prevSeconds => prevSeconds - 1);
-      }, 1000); // 1000 ms -> s
-    }
-  }, []);
 
   const show_condemned = () => {
     if (condemn !== "") {
@@ -47,7 +38,6 @@ export function Dusk({ socket, username, room, role, spectator, condemn}) {
     //   setRedirectOnce(false);
     // }
 
-    return <Night socket={socket} username={username} room={room} role={role} spectator={isSpectator} />
   }
 
   // if (redirect && seconds < 10) {

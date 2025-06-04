@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Night } from './Night.js';
+import { Game } from './Game.js';
 
 export function WaitingRoom({ socket, username, room, role, spectator }) {
   const [userList, setUserList] = useState([]);
@@ -13,7 +13,7 @@ export function WaitingRoom({ socket, username, room, role, spectator }) {
   });
 
   if (userList.length === 5) {
-    return <Night socket={socket} username={username} room={room} role={role} spectator={spectator} />
+    return <Game socket={socket} username={username} room={room} role={role} spectator={spectator} />
   }
 
   options();

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Morning } from './Morning.js';
 
-export function Dawn({ socket, username, room, role, spectator }) {
+export function Dawn({ socket, username, room, role, spectator, seconds }) {
   const [useOnce, setUseOnce] = useState(true);
   const [actOnce, setActOnce] = useState(true);
   const [forCop, setForCop] = useState(true);
@@ -12,40 +11,17 @@ export function Dawn({ socket, username, room, role, spectator }) {
   const [mafiaTarget, setMafiaTarget] = useState("");
   const [doctorTarget, setDoctorTarget] = useState("");
   const [copTarget, setCopTarget] = useState("");
-  const [seconds, setSeconds] = useState(15);
   const [isSpectator, setIsSpectator] = useState(spectator);
   const [copMessage, setCopMessage] = useState("");
   const [redirect, setRedirect] = useState(false);
   const [redirectOnce, setRedirectOnce] = useState(true);
 
-  useEffect(() => { // timer ticks down every second
-    return () => {
-      setInterval(() => {
-        setSeconds(prevSeconds => prevSeconds - 1);
-      }, 1000); // 1000 ms -> s
-    }
-  }, []);
 
   useEffect(() => {
     if (username === mafiaTarget && mafiaTarget !== doctorTarget) {
       setIsSpectator(true);
     }
   }, [mafiaTarget, doctorTarget]);
-
-  if (seconds <= 0) { // ends the night after timer is up
-    if (redirectOnce) {
-      socket.emit("redirect_all_in_room", room);
-      setRedirectOnce(false);
-    }
-  }
-
-  if (redirect && seconds < 10) {
-    return <Morning socket={socket} username={username} room={room} role={role} spectator={isSpectator} />
-  }
-
-  socket.on("redirect", (data) => {
-    setRedirect(data);
-  });
 
   if (useOnce) { // grab the targets from backend once
     socket.emit("get_mafia", "");
