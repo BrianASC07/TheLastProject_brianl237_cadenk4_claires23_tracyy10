@@ -78,7 +78,7 @@ export function Night({ socket, username, room, role, spectator }) {
     }
   })
 
-  if (youWin) {
+  if (youWin && seconds < 10) {
     return <Win socket={ socket } username={ username} room={room}/>
   }
 
