@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Night } from './Night.js';
+import { DuskHelper } from './DuskHelper.js'
 
 export function Dusk({ socket, username, room, role, spectator, seconds, condemn, setCondemned}) {
   const [aliveUserList, setAliveUserList] = useState([]);
@@ -32,7 +33,7 @@ export function Dusk({ socket, username, room, role, spectator, seconds, condemn
         } catch (error) { };
       })();
     }
-    
+
     // if (redirectOnce) {
     //   socket.emit("redirect_all_in_room", room);
     //   setRedirectOnce(false);
@@ -120,7 +121,10 @@ export function Dusk({ socket, username, room, role, spectator, seconds, condemn
       {seconds}
 
       <p> {show_condemned()} </p>
+      //TESTING RN
+      { DuskHelper() }
     </div>
+
   )
 }
 
