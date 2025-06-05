@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Morning } from './Morning.js';
 
-// Dawn phase styles, harmonized with Night phase
 const styles = {
   container: {
     background: 'linear-gradient(135deg, #fbeedb 0%, #e6e9f0 100%)',
