@@ -1,6 +1,27 @@
 import React, { useRef, useEffect, useState } from "react";
 import { Morning } from './Morning.js';
 import { script } from './Narration.js';
+
+import background from "./animations/background.png";
+import banana from './animations/banana.png';
+import blood from './animations/blood.png';
+import bug from './animations/bug.png';
+import butterfly from './animations/butterfly.png';
+import cactus from './animations/cactus.png';
+import cookie from './animations/cookie.png';
+import dead from './animations/dead.png';
+import dog from './animations/dog.png';
+import duck from './animations/duck.png';
+import exclaim from './animations/exclaim.png';
+import oil from './animations/oil.png';
+import pumpkin from './animations/pumpkin.png';
+import rake from './animations/rake.png';
+import rock from './animations/rock.png';
+import rot from './animations/rot.png';
+import skateboard from './animations/skateboard.png';
+import soda from './animations/soda.png';
+import string from './animations/string.png';
+
 // import { Canvas } from './Animation.js';
 
 export function Dawn({ socket, username, room, role, spectator }) {
@@ -20,6 +41,7 @@ export function Dawn({ socket, username, room, role, spectator }) {
   const [redirect, setRedirect] = useState(false);
   const [redirectOnce, setRedirectOnce] = useState(true);
   const [narration, setNarration] = useState("");
+  const [done, setDone] = useState(false);
 
   useEffect(() => { // timer ticks down every second
     return () => {
@@ -45,58 +67,60 @@ const Canvas = props => {
     }
     const context = updateCanvas.getContext('2d');
 
-    var image = new Image();
+    const image = new Image();
     var img = [];
+    
+    console.log(narration);
 
     if (narration.includes("stroll around the neighborhood") || narration.includes("running through a big sunny field") || narration.includes("scouting out possible picnic spots") || narration.includes("cheerfully frolicking") || narration.includes("grandmother's huge garden") || narration.includes("half marathon") || narration.includes("walking in the meadow")) {
-        img.push("./animations/background.png");
+        img.push(background);
     } else if (narration.includes("taking their dog for a walk")) {
-        img.push("./animations/dog.png");
+        img.push(dog);
     } else if (narration.includes("build up their bug collection")) {
-        img.push("./animations/bug.png");
+        img.push(bug);
     } else if (narration.includes("chase a pretty butterfly")) {
-        img.push("./animations/butterfly.png");
+        img.push(butterfly);
     }
 
     if (narration.includes("upturned rake")) {
-        img.push("./animations/rake.png");
+        img.push(rake);
     } else if (narration.includes("pet rock")) {
-        img.push("./animations/rock.png");
+        img.push(rock);
     } else if (narration.includes("puddle of oil")) {
-        img.push("./animations/oil.png");
+        img.push(oil);
     } else if (narration.includes("banana peel")) {
-        img.push("./animations/banana.png");
+        img.push(banana);
     } else if (narration.includes("skateboard")) {
-        img.push("./animations/skateboard.png");
+        img.push(skateboard);
     } else if (narration.includes("pet duck")) {
-        img.push("./animations/duck.png");
+        img.push(duck);
     } else if (narration.includes("thorny pet plant")) {
-        img.push("./animations/cactus.png");
+        img.push(cactus);
     } else if (narration.includes("empty soda can")) {
-        img.push("./animations/soda.png");
+        img.push(soda);
     } else if (narration.includes("jack-o-lantern")) {
-        img.push("./animations/pumpkin.png");
+        img.push(pumpkin);
     } else if (narration.includes("piece of string")) {
-        img.push("./animations/string.png");
+        img.push(string);
     }
 
     var dead = true;
     if (narration.includes("pool of blood")) {
-        img.push("./animations/blood.png");
+        img.push(blood);
     } else if (narration.includes("slowly decompose")) {
-        img.push("./animations/rot.png");
+        img.push(rot);
     } else if (narration.includes("never got up")) {
-        img.push("./animations/dead.png");
+        img.push(dead);
     } else if (narration.includes("freshly baked cookies")) {
         dead = false;
-        img.push("./animations/cookie.png");
+        img.push(cookie);
     } else {
         dead = false;
-        img.push("./animations/exclaim.png");
+        img.push(exclaim);
     }
 
     image.src = img[0];
-    image.crossOrigin = true;
+    console.log(img);
     var intervalID = null;
     var row = 0;
     var col = 0;
@@ -107,9 +131,15 @@ const Canvas = props => {
     } else {
       var speed = 300;
     }
+    console.log(speed);
+
     image.onload = function () {
+      if ((!done) && img.length!=1) {
+        setDone(true);
+        console.log("lalala");
         intervalID = setInterval(animate, speed, 4, 3, 3);
         // context.drawImage(image, 1, 1, 400, 400, 0, 0, 500, 500);
+      }
     }
 
     function animate(rows, cols, endCol) {
@@ -121,6 +151,7 @@ const Canvas = props => {
         context.clearRect(0, 0, 500, 500);
         context.drawImage(image, 0+480*col, 0+480*row, 480, 480, 0, 0, 500, 500);
         if (row === (rows-1) && col === (endCol-1)) {
+            console.log("done w/ sheet");
             clearInterval(intervalID);
             if (tracker === "background") {
                 tracker = "action";
