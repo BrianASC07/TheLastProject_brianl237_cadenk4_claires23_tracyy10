@@ -14,7 +14,7 @@ var copSelect = "";
 const phases = [
   { name: "Night", duration: 15 },
   { name: "Dawn", duration: 6 },
-  { name: "Morning", duration: 20 },
+  { name: "Morning", duration: 10 },
   { name: "Evening", duration: 15 },
   { name: "Dusk", duration: 7 },
 ];
@@ -42,7 +42,6 @@ io.on("connection", (socket) => { // whenever a connection to the serve is detec
           socket.emit("do_not_join", false);
           await add_to_room(socket.id, room, await pick_role(await get_roles_in_room(room)), username, socket);
           socket.join(room); // adds you to an arbitrary room; you can now emit messages to everyone in that room at once (like clumping...) (https://socket.io/docs/v3/rooms/)
-          console.log(`User with ID: ${socket.id} joined room: ${room}`);
         }
         else {
           socket.emit("do_not_join", true);
@@ -52,41 +51,54 @@ io.on("connection", (socket) => { // whenever a connection to the serve is detec
     })();
   });
 
+  socket.on("start_timer", (data) => {
+    (async () => {
+      try {
+        let phaseIndex = await get_room_phase(data);
+        let timeLeft = phases[phaseIndex].duration;
+
+        io.to(data).emit("time_update", { timeLeft, phaseIndex });
+
+        const interval = setInterval(async () => {
+          timeLeft -= 1;
+
+          if (timeLeft > 0) {
+            io.to(data).emit("time_update", { timeLeft, phaseIndex });
+          } else {
+            phaseIndex = (phaseIndex + 1) % phases.length;
+            const db = connect();
+            db.run("UPDATE rooms SET phase = ? WHERE room_id = ?", [phaseIndex, data]);
+            db.close();
+            timeLeft = phases[phaseIndex].duration;
+
+            // ---- NEW: Calculate condemned when moving from Evening to Dusk ----
+            if (phases[phaseIndex - 1]?.name === "Evening" && phases[phaseIndex].name === "Dusk") {
+              const condemned_name = await get_highest_condemn(data);
+              let condemned = "";
+              if (condemned_name[0][1] === 0) {
+                condemned = "";
+              } else if (condemned_name.length > 1 && condemned_name[0][1] === condemned_name[1][1]) {
+                condemned = "";
+              } else {
+                condemned = condemned_name[0][0];
+                await set_spectator(condemned, data);
+              }
+              io.to(data).emit("return_condemned", condemned);
+            }
+            // ---------------------------------------------------------------
+
+            io.to(data).emit("time_update", { timeLeft, phaseIndex });
+          }
+        }, 1000);
+      } catch (error) { }
+    })()
+  });
+
   socket.on("send_message", (data) => {
     socket.to(data.room).emit("receive_message", data); // calls the receive_message func in the frontend file
     // emits the message only to the people in that room
   });
-  
-  socket.on("start_timer", (data) => {
-    (async () => {
-      try {
-        let phaseIndex = await get_room_phase(data)
-        let phaseName = phases[phaseIndex].name
-        let timeLeft = phases[phaseIndex].duration;
 
-        io.to(data).emit("time_update", {timeLeft, phaseIndex});
-
-        setInterval(() => {
-          timeLeft -= 1;
-
-          io.to(data).emit("time_update", {timeLeft, phaseIndex});
-          
-          //move into next phase
-          if (timeLeft <= 0) {
-            phaseIndex = (phaseIndex + 1) % phases.length;
-            const db = connect();
-            db.run("UPDATE rooms SET phase = ? WHERE room_id = ?", [phaseIndex, data]);
-            db.close()
-            timeLeft = phases[phaseIndex].duration;
-
-            io.to(data).emit("time_update", {timeLeft, phaseIndex});
-          }
-        }, 1000);
-      
-      } catch (error) { }
-    })()
-  });
-  
   socket.on("request_userList", (data) => {
     (async () => {
       try {
@@ -152,6 +164,9 @@ io.on("connection", (socket) => { // whenever a connection to the serve is detec
     (async () => {
       try {
         await set_spectator(data[0], data[1]);
+        // Emit updated lists to everyone in the room
+        io.to(data[1]).emit("user_alive_list", await get_alive_users_in_room(data[1]));
+        io.to(data[1]).emit("user_spectating_list", await get_spectating_users_in_room(data[1]));
       } catch (error) { }
     })();
   });
@@ -203,14 +218,23 @@ io.on("connection", (socket) => { // whenever a connection to the serve is detec
     socket.to(data).emit("redirect", true);
   })
 
+
+  socket.on("get_all_mafia_in_room", (data) => {
+    (async() => {
+      try {
+        socket.emit("recieve_cnt_mafia", await get_how_many_role_in_room("mafia", data));
+      } catch (error) {};
+    })();
+  });
+
   socket.on("disconnect", () => {
     (async () => { try { await remove_from_room(socket.id) } catch (error) { } })();
     console.log("User disconnected: ", socket.id) // listens to disconnects from the server
   });
 
-  // socket.on("test", (data) => {
-  //   console.log(`!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ${data}`);
-  // })
+  socket.on("test", (data) => {
+    console.log(`!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ${data}`);
+  })
 });
 
 server.listen(3001, () => { // run 'npm start'
@@ -298,35 +322,6 @@ function get_room_phase(room) {
     close(db);
   });
 }
-
-async function room_timer(room) {
-  const db = connect();
-  let phaseIndex = await get_room_phase(room)
-  console.log("this is the phase index: " + phaseIndex)
-  let timeLeft = phases[phaseIndex].duration;
-
-  socket.to(room).emit("time_update", {timeLeft});
-
-  //Set Interval
-  setInterval(() => {
-    timeLeft -= 1;
-
-    // Broadcast time update
-    socket.to(room).emit("time_update", {timeLeft});
-
-    if (timeLeft <= 0) {
-      // Move to next phase
-      phaseIndex = (phaseIndex + 1) % phases.length;
-      db.run("UPDATE rooms SET phase = ? WHERE room_id = ?", [phaseIndex, room]);
-      timeLeft = phases[phaseIndex].duration;
-
-      // Broadcast new phase
-      socket.to(room).emit("time_update", {timeLeft});
-    }
-  }, 1000);
-  db.close()
-}
-
 
 function get_roles_in_room(room) { // returns an array of roles in a given room
   const db = connect();
@@ -416,7 +411,10 @@ function get_user_id(username, room) {
         console.log(err.message);
         reject(err);
       }
-      resolve(rows.user_id);
+      if (typeof(rows) !== undefined) {
+        resolve(rows.userID);
+      }
+      resolve(console.log("Row 351 unidentified error (timing misaligned, most likely)"));
     });
     close(db);
   });
@@ -479,20 +477,6 @@ function get_highest_condemn(room) {
       })
       console.log(ret);
       resolve(ret);
-      // if (rows[0].condemnCnt === 0) { // if no one was voted
-      //   console.log("THIIS HAPPENED!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-      //   resolve("");
-      // }
-      // else if (rows.length > 1) { // if tie
-      //   if (rows[0].condemnCnt === rows[1].condemnCnt) {
-      //     console.log("THIIS HAPPENED@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
-      //     resolve("");
-      //   }
-      // }
-      // else {
-      //   console.log("THIIS HAPPENED=========================================");
-      //   resolve(rows[0].username);
-      // }
     });
     close(db);
   });
@@ -509,4 +493,22 @@ function reset_condemn_cnt(room) {
       resolve(console.log(`Reset all condemnCnt in room_id: ${room}`));
     })
   })
+}
+
+function get_how_many_role_in_room(role, room) {
+  const db = connect();
+  return new Promise((resolve, reject) => {
+    db.all("SELECT role FROM rooms WHERE room_id = ? AND role = ? AND spectating = ?", [room, role, 0], (err, rows) => {
+      if (err) {
+        console.log(err.message);
+        reject(err);
+      }
+      const ret = []
+      if (rows !== undefined) {
+        rows.forEach(value => ret.push(value.role));
+      }
+      resolve(ret.length);
+    });
+    close(db);
+  });
 }
