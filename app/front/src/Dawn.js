@@ -284,6 +284,8 @@ export function Dawn({ socket, username, room, role, spectator, seconds }) {
       <p> dawn </p>
       {seconds}
 
+      { Canvas() }
+      <p> {narration} </p>
       <p> {ifCop() } </p>
     </div>
   )
