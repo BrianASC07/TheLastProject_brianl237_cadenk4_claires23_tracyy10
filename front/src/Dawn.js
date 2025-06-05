@@ -35,7 +35,7 @@ export function Dawn({ socket, username, room, role, spectator }) {
   const [mafiaTarget, setMafiaTarget] = useState("");
   const [doctorTarget, setDoctorTarget] = useState("");
   const [copTarget, setCopTarget] = useState("");
-  const [seconds, setSeconds] = useState(5);
+  const [seconds, setSeconds] = useState(15);
   const [isSpectator, setIsSpectator] = useState(spectator);
   const [copMessage, setCopMessage] = useState("");
   const [redirect, setRedirect] = useState(false);

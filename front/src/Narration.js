@@ -1,14 +1,14 @@
 const background = [
   " was taking a stroll around the neighborhood",
   //dog
-  " was taking their dog for a walk",
+  //" was taking their dog for a walk",
   //run
   " was running through a big sunny field",
   " was scouting out possible picnic spots on the grass",
   " was cheerfully frolicking in the park",
   " was running through their grandmother's huge garden",
   //bug
-  " was out and about trying to build up their bug collection",
+  //" was out and about trying to build up their bug collection",
   //butterfly, run
   " was trying to chase a pretty butterfly",
   //run
@@ -51,7 +51,7 @@ function randomInt(max) {
 
 export function script(user, death) {
   var res = user;
-  res+=background[randomInt(10)];
+  res+=background[randomInt(8)];
   if (death) {
     res+=" when they" + action[randomInt(10)];
     res+=result[randomInt(3)];
