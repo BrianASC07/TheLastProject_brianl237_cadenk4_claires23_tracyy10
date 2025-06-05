@@ -71,7 +71,6 @@ io.on("connection", (socket) => { // whenever a connection to the serve is detec
             db.close();
             timeLeft = phases[phaseIndex].duration;
 
-            // ---- NEW: Calculate condemned when moving from Evening to Dusk ----
             if (phases[phaseIndex - 1]?.name === "Evening" && phases[phaseIndex].name === "Dusk") {
               const condemned_name = await get_highest_condemn(data);
               let condemned = "";
@@ -85,7 +84,7 @@ io.on("connection", (socket) => { // whenever a connection to the serve is detec
               }
               io.to(data).emit("return_condemned", condemned);
             }
-            // ---------------------------------------------------------------
+            
 
             io.to(data).emit("time_update", { timeLeft, phaseIndex });
           }
