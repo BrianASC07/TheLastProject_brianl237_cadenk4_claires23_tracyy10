@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
+import { Evening } from './Evening.js';
+import { Win } from './Win.js';
 
-export function Morning({ socket, username, room, role, spectator, onPhaseChange, seconds }) {
+export function Morning({ socket, username, room, role, spectator, seconds }) {
     const [currentMessage, setCurrentMessage] = useState(""); // use setCurrentMessage to update var currentMessage
     const [messageList, setMessageList] = useState([]);
     const [aliveUserList, setAliveUserList] = useState([]);
@@ -9,6 +11,7 @@ export function Morning({ socket, username, room, role, spectator, onPhaseChange
     const [roleDescription, setRoleDescription] = useState("");
     const [redirect, setRedirect] = useState(false);
     const [redirectOnce, setRedirectOnce] = useState(true);
+    const [youWin, setYouWin] = useState(false);
 
     const sendMessage = async () => { // ASYNC causes this function to wait for the AWAIT statement to be finished (a new message is sent) before it runs (otherwise the data required to complete this func would be missing)
         if (currentMessage !== "" && spectator === false) { // cannot send empty messages
@@ -32,10 +35,11 @@ export function Morning({ socket, username, room, role, spectator, onPhaseChange
             setMessageList((list) => [...list, data]); // appends data (new message) to the current messageList
         });
     }, [socket]);
-    
+
     const options = async () => {
         await socket.emit("request_alive_userList", room);
         await socket.emit("request_spectating_userList", room);
+        await socket.emit("get_all_mafia_in_room", room);
     };
 
     socket.on("user_alive_list", (data) => {
@@ -45,6 +49,16 @@ export function Morning({ socket, username, room, role, spectator, onPhaseChange
     socket.on("user_spectating_list", (data) => {
         setSpectatingUserList(data);
     });
+
+    socket.on("recieve_cnt_mafia", (data) => {
+      if (data === 0) {
+        setYouWin(true);
+      }
+    });
+
+    if (youWin) {
+      return <Win socket={ socket } username={ username} room={room}/>
+    }
 
     function description(role) {
         setCheckRole(true);
@@ -103,6 +117,7 @@ export function Morning({ socket, username, room, role, spectator, onPhaseChange
             <div className="chat-window">
                 <div className="chat-header">
                     <p> chat header!!! </p>
+                    {seconds}
                 </div>
                 <div className="chat-body">
                     {messageList.map((messageContent, index) => { // .map returns a new array by modifying every element of the og array (aka for loop!)
