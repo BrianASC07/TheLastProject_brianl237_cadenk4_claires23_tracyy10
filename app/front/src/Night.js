@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react";
+import { Dawn } from './Dawn.js';
+import { Win } from './Win.js';
 
 const styles = {
   container: {
@@ -109,37 +111,61 @@ const styles = {
   },
 };
 
+
 export function Night({ socket, username, room, role, spectator, seconds }) {
   const [aliveUserList, setAliveUserList] = useState([]);
   const [spectatingUserList, setSpectatingUserList] = useState([]);
   const [target, setTarget] = useState("");
   const [checkRole, setCheckRole] = useState(false);
   const [roleDescription, setRoleDescription] = useState("");
+  const [youWin, setYouWin] = useState(false);
 
+  // https://react.dev/learn/synchronizing-with-effects#how-to-handle-the-effect-firing-twice-in-development
+  // because of how useEffect runs their 'setup' code and 'cleanup' code, effects "running twice" often occur
+  // to fix, add the 'cleanup' code which undos the 'setup' code (first instance of running is for bug catching)
+  // in this case, i just put everything inside the 'cleanup' code, which idk if its good practice? but it worked :D
 
   useEffect(() => {
-    if (role === 'mafia') socket.emit("set_mafia", target);
-    if (role === 'doctor') socket.emit("set_doctor", target);
-    if (role === 'cop') socket.emit("set_cop", target);
-  }, [role, socket, target]);
+    if (role === 'mafia') {
+      socket.emit("set_mafia", target);
+    }
+    if (role === 'doctor') {
+      socket.emit("set_doctor", target);
+    }
+    if (role === 'cop') {
+      socket.emit("set_cop", target);
+    }
+  }, [role, socket, target]); 
 
   useEffect(() => {
     socket.emit("request_alive_userList", room);
     socket.emit("request_spectating_userList", room);
+    if (seconds < 14) {
+      socket.emit("get_all_mafia_in_room", room);
+    }
+  }, [socket, room, seconds]);
 
-    const handleAlive = data => setAliveUserList(data);
-    const handleSpectating = data => setSpectatingUserList(data);
+  useEffect(() => {
+    const handleAliveList = (data) => setAliveUserList(data);
+    const handleSpectatingList = (data) => setSpectatingUserList(data);
+    const handleCntMafia = (data) => { if (data === 0) setYouWin(true); };
 
-    socket.on("user_alive_list", handleAlive);
-    socket.on("user_spectating_list", handleSpectating);
+    socket.on("user_alive_list", handleAliveList);
+    socket.on("user_spectating_list", handleSpectatingList);
+    socket.on("recieve_cnt_mafia", handleCntMafia);
 
     return () => {
-      socket.off("user_alive_list", handleAlive);
-      socket.off("user_spectating_list", handleSpectating);
+      socket.off("user_alive_list", handleAliveList);
+      socket.off("user_spectating_list", handleSpectatingList);
+      socket.off("recieve_cnt_mafia", handleCntMafia);
     };
-  }, [socket, room]);
+  }, [socket]);
 
-  function message() {
+  if (youWin) {
+    return <Win socket={ socket } username={ username} room={room}/>
+  }
+
+  const message = () => {
     if (target !== "") {
       if (role === "mafia") {
         return <div style={styles.msg}>You have selected <b>{target}</b> to kill.</div>
@@ -147,27 +173,31 @@ export function Night({ socket, username, room, role, spectator, seconds }) {
       if (role === "doctor") {
         return <div style={styles.msg}>You have selected <b>{target}</b> to protect.</div>
       }
+      else {
       return <div style={styles.msg}>You have selected <b>{target}</b> to investigate.</div>;
+      }
     }
-    if (!spectator) {
+    else if (spectator === false) {
       return <div style={styles.msg}>You are thinking of who to select...</div>
     }
-    return "";
+    else {
+      return "";
+    }
   }
 
   function description(role) {
     setCheckRole(true);
     if (role === "mafia") {
-      setRoleDescription("The mafia is the evil figure, selecting someone to eliminate each night. Blend in during the day and avoid suspicion!");
+      setRoleDescription("The mafia is the evil guy, blah blah blah, kill someone each night...");
     }
     else if (role === "doctor") {
-      setRoleDescription("The doctor can save a life each night. Choose wisely who to protect and try to outsmart the mafia!");
+      setRoleDescription("The doctor is a pretty cool role, blah blah blah, grant invincibility to a person for a night...");
     }
     else if (role === "cop") {
-      setRoleDescription("The cop investigates one player each night to discover their true role. Share your knowledge carefully!");
+      setRoleDescription("The cop is cool i guess, blah blah blah, select someone to investigate each night to learn their role in the morning...");
     }
     else {
-      setRoleDescription("The innocent is a basic role. You have no special night power, but your voice and vote matter during the day. Pay close attention!");
+      setRoleDescription("The innocent is a basic role... you have no special role at night. Fear not because there is power in numbers, pay attention to the others' behaviour and vote to condemn the suspicious in the morning!");
     }
   }
 
@@ -267,4 +297,4 @@ export function Night({ socket, username, room, role, spectator, seconds }) {
   }
 }
 
-export default Night;
+export default Night
