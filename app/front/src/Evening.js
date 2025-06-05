@@ -109,7 +109,6 @@ const styles = {
   },
 };
 
-
 export function Evening({ socket, username, room, role, spectator, seconds, condemned, setCondemned}) {
   const [aliveUserList, setAliveUserList] = useState([]);
   const [spectatingUserList, setSpectatingUserList] = useState([]);
@@ -118,8 +117,27 @@ export function Evening({ socket, username, room, role, spectator, seconds, cond
   const [target, setTarget] = useState("");
   const [doOnce, setDoOnce] = useState(true);
   const [idiotTriedToVote, setIdiotTriedToVote] = useState("");
-  const [redirect, setRedirect] = useState(false);
-  const [redirectOnce, setRedirectOnce] = useState(true);
+
+  // Request alive/spectating lists
+  const options = async () => {
+    await socket.emit("request_alive_userList", room);
+    await socket.emit("request_spectating_userList", room);
+  };
+
+  useEffect(() => {
+    options(); 
+
+    const handleAliveList = (data) => setAliveUserList(data);
+    const handleSpectatingList = (data) => setSpectatingUserList(data);
+
+    socket.on("user_alive_list", handleAliveList);
+    socket.on("user_spectating_list", handleSpectatingList);
+
+    return () => {
+      socket.off("user_alive_list", handleAliveList);
+      socket.off("user_spectating_list", handleSpectatingList);
+    };
+  }, [socket, room, setCondemned]);
 
   const picked_who = () => {
     if (target !== "" && spectator === false) {
@@ -129,43 +147,13 @@ export function Evening({ socket, username, room, role, spectator, seconds, cond
   }
 
   const vote = (uname) => {
-    if (spectator === false) {
+    if (spectator === false && target === "") {
       setTarget(uname);
-    }
-    else {
+      socket.emit("update_condemnCnt", [uname, room]); // Send vote immediately
+    } else if (spectator) {
       setIdiotTriedToVote("You may not vote, you are dead.");
     }
   }
-
-  if (seconds <= 0) { // ends the night after timer is up
-    if (doOnce && target !== "") {
-      (async () => {
-        try {
-          await socket.emit("update_condemnCnt", [target, room]);
-          await socket.emit("get_condemned", room);
-          setDoOnce(false);
-        } catch (error) { };
-      })();
-    }
-
-  }
-
-  socket.on("return_condemned", (data) => {
-    setCondemned(data);
-  })
-
-  const options = async () => {
-    await socket.emit("request_alive_userList", room);
-    await socket.emit("request_spectating_userList", room);
-  };
-
-  socket.on("user_alive_list", (data) => {
-    setAliveUserList(data);
-  });
-
-  socket.on("user_spectating_list", (data) => {
-    setSpectatingUserList(data);
-  });
 
   function description(role) {
     setCheckRole(true);
@@ -216,8 +204,6 @@ export function Evening({ socket, username, room, role, spectator, seconds, cond
       </div>
     )
   }
-
-  options();
   return (
     <div>
       {/* constant() */}
