@@ -265,7 +265,7 @@ export function Morning({ socket, username, room, role, spectator, seconds }) {
           <div style={styles.title}>Morning Phase</div>
           <div style={styles.role}>You are the <span>{role}</span></div>
           <div>
-            {["mafia", "doctor", "cop", "innocent"].map((roleName) => (
+            {["mafia", "doctor", "cop", "fool", "innocent"].map((roleName) => (
               <button
                 key={roleName}
                 style={styles.button}
