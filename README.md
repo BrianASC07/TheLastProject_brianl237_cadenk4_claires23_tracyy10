@@ -57,7 +57,7 @@ $ npm start
 ```
 4. Navigate to localhost: http://localhost:3000/
 
-Alternately, you can navigate to http://68.183.119.58/
+Alternately, you can navigate to https://brianl.tech/
 
 ## Credit
 This project was achieved through the help of this youtube guide: https://www.youtube.com/watch?v=NU-HfZY3ATQ&ab_channel=PedroTech. Thank you for the digestible introduction into node, socket, and react!
