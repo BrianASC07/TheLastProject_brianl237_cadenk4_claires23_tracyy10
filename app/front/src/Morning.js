@@ -11,7 +11,7 @@ export function Morning({ socket, username, room, role, spectator, seconds }) {
     const [roleDescription, setRoleDescription] = useState("");
     const [redirect, setRedirect] = useState(false);
     const [redirectOnce, setRedirectOnce] = useState(true);
-    const [youWin, setYouWin] = useState(false);
+    const [youWin, setYouWin] = useState([false, ""]);
 
     const sendMessage = async () => { // ASYNC causes this function to wait for the AWAIT statement to be finished (a new message is sent) before it runs (otherwise the data required to complete this func would be missing)
         if (currentMessage !== "" && spectator === false) { // cannot send empty messages
@@ -52,29 +52,32 @@ export function Morning({ socket, username, room, role, spectator, seconds }) {
 
     socket.on("recieve_cnt_mafia", (data) => {
       if (data === 0) {
-        setYouWin(true);
+        setYouWin([true, "town"]);
       }
     });
 
-    if (youWin) {
-      return <Win socket={ socket } username={ username} room={room}/>
+    if (youWin[0]) {
+        return <Win socket={ socket } username={ username} room={room} condition={youWin[1]}/>
     }
 
     function description(role) {
-        setCheckRole(true);
-        if (role === "mafia") {
-            setRoleDescription("The mafia is the evil guy, blah blah blah, kill someone each night...");
-        }
-        else if (role === "doctor") {
-            setRoleDescription("The doctor is a pretty cool role, blah blah blah, grant invincibility to a person for a night...");
-        }
-        else if (role === "cop") {
-            setRoleDescription("The cop is cool i guess, blah blah blah, select someone to investigate each night to learn their role in the morning...");
-        }
-        else {
-            setRoleDescription("The innocent is a basic role... you have no special role at night. Fear not because there is power in numbers, pay attention to the others' behaviour and vote to condemn the suspicious in the morning!");
-        }
+    setCheckRole(true);
+    if (role === "mafia") {
+      setRoleDescription("The mafia's goal is to kill off all the other members in the party while not getting caught. Every night, they can select another player and send death vibes their way!");
     }
+    else if (role === "doctor") {
+      setRoleDescription("The doctor is a member of the townsfolk with a very special job. Every night, they can select another player and protect them from misfortune.");
+    }
+    else if (role === "cop") {
+      setRoleDescription("The cop is a member of the townsfolk with a very special job. Every night, they can select another player and investigate them and find out their role!");
+    }
+    else if (role === "fool") {
+      setRoleDescription("The fool is neither aligned with the townsfolk nor the mafia. They win upon getting condemned and hung.")
+    }
+    else {
+      setRoleDescription("The innocent is a member of the townsfolk.");
+    }
+  }
 
     const constant = () => {
         return (
@@ -82,7 +85,7 @@ export function Morning({ socket, username, room, role, spectator, seconds }) {
                 <div /* top */>
                     <p> You are the </p>
                     <p> {role} </p>
-                    {["mafia", "doctor", "cop", "innocent"].map((role, index) => {
+                    {["mafia", "doctor", "cop", "fool", "innocent"].map((role, index) => {
                         return <button onClick={() => description(role)}> {role} </button>
                     })}
                     {checkRole ? (
@@ -113,7 +116,7 @@ export function Morning({ socket, username, room, role, spectator, seconds }) {
     options();
     return (
         <div>
-            {/* constant() */}
+            { constant() }
             <div className="chat-window">
                 <div className="chat-header">
                     <p> chat header!!! </p>

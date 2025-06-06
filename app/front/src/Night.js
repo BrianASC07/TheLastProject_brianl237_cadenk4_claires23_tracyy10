@@ -111,14 +111,15 @@ const styles = {
   },
 };
 
-
 export function Night({ socket, username, room, role, spectator, seconds }) {
   const [aliveUserList, setAliveUserList] = useState([]);
   const [spectatingUserList, setSpectatingUserList] = useState([]);
   const [target, setTarget] = useState("");
   const [checkRole, setCheckRole] = useState(false);
   const [roleDescription, setRoleDescription] = useState("");
-  const [youWin, setYouWin] = useState(false);
+  const [youWin, setYouWin] = useState([false, ""]);
+  const [uno, setUno] = useState(true);
+  const [wasFool, setWasFool] = useState(false);
 
   // https://react.dev/learn/synchronizing-with-effects#how-to-handle-the-effect-firing-twice-in-development
   // because of how useEffect runs their 'setup' code and 'cleanup' code, effects "running twice" often occur
@@ -138,31 +139,47 @@ export function Night({ socket, username, room, role, spectator, seconds }) {
   }, [role, socket, target]); 
 
   useEffect(() => {
-    socket.emit("request_alive_userList", room);
-    socket.emit("request_spectating_userList", room);
-    if (seconds < 14) {
-      socket.emit("get_all_mafia_in_room", room);
-    }
+    return (async() => {
+      await socket.emit("request_alive_userList", room);
+      await socket.emit("request_spectating_userList", room);
+      await socket.emit("was_fool_condemned", room);
+      if (seconds < 14) {
+        await socket.emit("get_all_mafia_in_room", room);
+      }
+    });
   }, [socket, room, seconds]);
 
   useEffect(() => {
     const handleAliveList = (data) => setAliveUserList(data);
     const handleSpectatingList = (data) => setSpectatingUserList(data);
-    const handleCntMafia = (data) => { if (data === 0) setYouWin(true); };
+    const handleCntMafia = (data) => { if (data === 0) setYouWin([true, "town"]); };
+    const handleFool = (data) => { setWasFool(data); if (data === true) setYouWin([true, "fool"]);} 
 
     socket.on("user_alive_list", handleAliveList);
     socket.on("user_spectating_list", handleSpectatingList);
     socket.on("recieve_cnt_mafia", handleCntMafia);
+    socket.on("get_fool", handleFool);
 
     return () => {
       socket.off("user_alive_list", handleAliveList);
       socket.off("user_spectating_list", handleSpectatingList);
       socket.off("recieve_cnt_mafia", handleCntMafia);
+      socket.on("get_fool", handleFool);
     };
-  }, [socket]);
+  }, [socket, aliveUserList]);
 
-  if (youWin) {
-    return <Win socket={ socket } username={ username} room={room}/>
+  if (uno) {
+    // socket.emit("test", wasFool);
+    if (aliveUserList.length === 1) {
+      setYouWin([true, "mafia"]);
+    }
+    if (aliveUserList.length !== 0) {
+      setUno(false);
+    }
+  }
+
+  if (youWin[0]) {
+    return <Win socket={ socket } username={ username} room={room} condition={youWin[1]}/>
   }
 
   const message = () => {
@@ -188,16 +205,19 @@ export function Night({ socket, username, room, role, spectator, seconds }) {
   function description(role) {
     setCheckRole(true);
     if (role === "mafia") {
-      setRoleDescription("The mafia is the evil guy, blah blah blah, kill someone each night...");
+      setRoleDescription("The mafia's goal is to kill off all the other members in the party while not getting caught. Every night, they can select another player and send death vibes their way!");
     }
     else if (role === "doctor") {
-      setRoleDescription("The doctor is a pretty cool role, blah blah blah, grant invincibility to a person for a night...");
+      setRoleDescription("The doctor is a member of the townsfolk with a very special job. Every night, they can select another player and protect them from misfortune.");
     }
     else if (role === "cop") {
-      setRoleDescription("The cop is cool i guess, blah blah blah, select someone to investigate each night to learn their role in the morning...");
+      setRoleDescription("The cop is a member of the townsfolk with a very special job. Every night, they can select another player and investigate them and find out their role!");
+    }
+    else if (role === "fool") {
+      setRoleDescription("The fool is neither aligned with the townsfolk nor the mafia. They win upon getting condemned and hung.")
     }
     else {
-      setRoleDescription("The innocent is a basic role... you have no special role at night. Fear not because there is power in numbers, pay attention to the others' behaviour and vote to condemn the suspicious in the morning!");
+      setRoleDescription("The innocent is a member of the townsfolk.");
     }
   }
 
@@ -208,7 +228,7 @@ export function Night({ socket, username, room, role, spectator, seconds }) {
           <div style={styles.title}>Night Phase</div>
           <div style={styles.role}>You are the <span>{role}</span></div>
           <div>
-            {["mafia", "doctor", "cop", "innocent"].map((roleName) => (
+            {["mafia", "doctor", "cop", "fool", "innocent"].map((roleName) => (
               <button
                 key={roleName}
                 style={styles.button}
@@ -257,7 +277,7 @@ export function Night({ socket, username, room, role, spectator, seconds }) {
         <div style={styles.section}>
           <div style={styles.title}>Select a target</div>
           {aliveUserList.map((uname, idx) => {
-            if (username !== uname || role === "doctor" || role === "mafia") {
+            if (username !== uname || role === "doctor") {
               return (
                 <button
                   key={uname + idx}
@@ -288,6 +308,7 @@ export function Night({ socket, username, room, role, spectator, seconds }) {
     // Innocent/other roles
     return (
       <div style={styles.container}>
+        {constant()}
         <div style={styles.section}>
           <div style={styles.title}>Night</div>
           <div style={styles.timer}>{seconds}s</div>

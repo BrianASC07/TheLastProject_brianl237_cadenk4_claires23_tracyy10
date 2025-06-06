@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Morning } from './Morning.js';
+import { script } from './narration.js';
 
 export function Dawn({
   socket, username, room, role, spectator, seconds,
@@ -16,6 +17,7 @@ export function Dawn({
   const [doctorTarget, setDoctorTarget] = useState("");
   const [redirect, setRedirect] = useState(false);
   const [redirectOnce, setRedirectOnce] = useState(true);
+  const [narration, setNarration] = useState("");
 
   // Request targets once
   useEffect(() => {
@@ -80,16 +82,12 @@ export function Dawn({
 
   // Handle killing logic (unchanged)
   useEffect(() => {
-    if (mafiaTarget === doctorTarget) {
-      // no kill...
-    } else if (mafiaTarget === username && role === "mafia") {
-      if (actOnce) {
-        socket.emit("kill_user", [mafiaTarget, room]);
-        setActOnce(false);
-      }
+    if (mafiaTarget === doctorTarget && mafiaTarget !== "") {
+      setNarration(script(mafiaTarget, false));
     } else if (mafiaTarget !== doctorTarget) {
       if (actOnce) {
         socket.emit("kill_user", [mafiaTarget, room]);
+        setNarration(script(mafiaTarget, true));
         setActOnce(false);
       }
     }
@@ -102,6 +100,13 @@ export function Dawn({
     return "";
   }
 
+  const ifNarration = () => {
+    if (narration !== "") {
+      return narration;
+    }
+    return "";
+  }
+
   const options = async () => {
     await socket.emit("request_alive_userList", room);
     await socket.emit("request_spectating_userList", room);
@@ -110,16 +115,19 @@ export function Dawn({
   function description(role) {
     setCheckRole(true);
     if (role === "mafia") {
-      setRoleDescription("The mafia is the evil guy, blah blah blah, kill someone each night...");
+      setRoleDescription("The mafia's goal is to kill off all the other members in the party while not getting caught. Every night, they can select another player and send death vibes their way!");
     }
     else if (role === "doctor") {
-      setRoleDescription("The doctor is a pretty cool role, blah blah blah, grant invincibility to a person for a night...");
+      setRoleDescription("The doctor is a member of the townsfolk with a very special job. Every night, they can select another player and protect them from misfortune.");
     }
     else if (role === "cop") {
-      setRoleDescription("The cop is cool i guess, blah blah blah, select someone to investigate each night to learn their role in the morning...");
+      setRoleDescription("The cop is a member of the townsfolk with a very special job. Every night, they can select another player and investigate them and find out their role!");
+    }
+    else if (role === "fool") {
+      setRoleDescription("The fool is neither aligned with the townsfolk nor the mafia. They win upon getting condemned and hung.")
     }
     else {
-      setRoleDescription("The innocent is a basic role... you have no special role at night. Fear not because there is power in numbers, pay attention to the others' behaviour and vote to condemn the suspicious in the morning!");
+      setRoleDescription("The innocent is a member of the townsfolk.");
     }
   }
 
@@ -129,7 +137,7 @@ export function Dawn({
         <div /* top */>
           <p> You are the </p>
           <p> {role} </p>
-          {["mafia", "doctor", "cop", "innocent"].map((role, index) => {
+          {["mafia", "doctor", "cop", "fool", "innocent"].map((role, index) => {
             return <button onClick={() => description(role)}> {role} </button>
           })}
           {checkRole ? (
@@ -164,6 +172,7 @@ export function Dawn({
       <p> dawn </p>
       {seconds}
 
+      <p> {ifNarration()} </p>
       <p> {ifCop() } </p>
     </div>
   )

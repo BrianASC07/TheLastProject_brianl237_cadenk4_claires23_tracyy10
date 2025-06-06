@@ -10,6 +10,7 @@ app.use(cors());
 var mafiaSelect = "";
 var doctorSelect = "";
 var copSelect = "";
+var condemned = "";
 
 const phases = [
   { name: "Night", duration: 15 },
@@ -137,6 +138,11 @@ io.on("connection", (socket) => { // whenever a connection to the serve is detec
     copSelect = data;
   });
 
+  socket.on("set_condemned", (data) => {
+    console.log(`${data} was condemned`);
+    condemned = data;
+  })
+
   socket.on("get_mafia", (data) => {
     socket.emit("recieve_mafia", mafiaSelect);
   });
@@ -217,7 +223,6 @@ io.on("connection", (socket) => { // whenever a connection to the serve is detec
     socket.to(data).emit("redirect", true);
   })
 
-
   socket.on("get_all_mafia_in_room", (data) => {
     (async() => {
       try {
@@ -229,6 +234,24 @@ io.on("connection", (socket) => { // whenever a connection to the serve is detec
   socket.on("disconnect", () => {
     (async () => { try { await remove_from_room(socket.id) } catch (error) { } })();
     console.log("User disconnected: ", socket.id) // listens to disconnects from the server
+  });
+
+  socket.on("was_fool_condemned", (data) => {
+    (async() => {
+      try {
+        // console.log(`CONDMNED::: ${condemned} ######################################`);
+        if (condemned !== "") {
+          role = await get_role(condemned, data);
+          // console.log(`ROLE OF THEM::: ${role} @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@`);
+          if (role === "fool") {
+            socket.emit("get_fool", true);
+          }
+          else {
+            socket.emit("get_fool", false);
+          }
+        }
+      } catch (error) {};
+    })();
   });
 
   socket.on("test", (data) => {
@@ -280,16 +303,31 @@ function createTable() {
   });
 }
 
+// function pick_role(in_room) {
+//   const only_consider = [];
+//   if (!in_room.includes("mafia")) only_consider.push("mafia");
+//   if (!in_room.includes("cop")) only_consider.push("cop");
+//   if (!in_room.includes("doctor")) only_consider.push("doctor");
+//   const cnt_innocent = in_room.reduce((count, current) => {
+//     if (current == "innocent") count++;
+//     return count;
+//   }, 0);
+//   for (let i = 0; i < (2 - cnt_innocent); i++) { only_consider.push("innocent"); }
+//   return only_consider[Math.floor(Math.random() * only_consider.length)];
+// }
+
 function pick_role(in_room) {
   const only_consider = [];
   if (!in_room.includes("mafia")) only_consider.push("mafia");
   if (!in_room.includes("cop")) only_consider.push("cop");
   if (!in_room.includes("doctor")) only_consider.push("doctor");
-  const cnt_innocent = in_room.reduce((count, current) => {
-    if (current == "innocent") count++;
-    return count;
-  }, 0);
-  for (let i = 0; i < (2 - cnt_innocent); i++) { only_consider.push("innocent"); }
+  // const cnt_innocent = in_room.reduce((count, current) => {
+  //   if (current == "innocent") count++;
+  //   return count;
+  // }, 0);
+  // for (let i = 0; i < (2 - cnt_innocent); i++) { only_consider.push("innocent"); }
+  if (!in_room.includes("fool")) only_consider.push("fool");
+  if (!in_room.includes("innocent")) only_consider.push("innocent");
   return only_consider[Math.floor(Math.random() * only_consider.length)];
 }
 
@@ -413,7 +451,7 @@ function get_user_id(username, room) {
       if (typeof(rows) !== undefined) {
         resolve(rows.userID);
       }
-      resolve(console.log("Row 351 unidentified error (timing misaligned, most likely)"));
+      resolve(console.log("(timing misaligned, most likely)"));
     });
     close(db);
   });

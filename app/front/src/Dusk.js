@@ -13,6 +13,9 @@ export function Dusk({ socket, username, room, role, spectator, seconds, condemn
 
   const show_condemned = () => {
     if (condemn !== "") {
+      (async() => {
+        await socket.emit("set_condemned", condemn);
+      })();
       return `${condemn} has been sentenced to death by DEATH!!!!`
     }
     else {
@@ -50,16 +53,19 @@ export function Dusk({ socket, username, room, role, spectator, seconds, condemn
   function description(role) {
     setCheckRole(true);
     if (role === "mafia") {
-      setRoleDescription("The mafia is the evil guy, blah blah blah, kill someone each night...");
+      setRoleDescription("The mafia's goal is to kill off all the other members in the party while not getting caught. Every night, they can select another player and send death vibes their way!");
     }
     else if (role === "doctor") {
-      setRoleDescription("The doctor is a pretty cool role, blah blah blah, grant invincibility to a person for a night...");
+      setRoleDescription("The doctor is a member of the townsfolk with a very special job. Every night, they can select another player and protect them from misfortune.");
     }
     else if (role === "cop") {
-      setRoleDescription("The cop is cool i guess, blah blah blah, select someone to investigate each night to learn their role in the morning...");
+      setRoleDescription("The cop is a member of the townsfolk with a very special job. Every night, they can select another player and investigate them and find out their role!");
+    }
+    else if (role === "fool") {
+      setRoleDescription("The fool is neither aligned with the townsfolk nor the mafia. They win upon getting condemned and hung.")
     }
     else {
-      setRoleDescription("The innocent is a basic role... you have no special role at night. Fear not because there is power in numbers, pay attention to the others' behaviour and vote to condemn the suspicious in the morning!");
+      setRoleDescription("The innocent is a member of the townsfolk.");
     }
   }
 
@@ -69,7 +75,7 @@ export function Dusk({ socket, username, room, role, spectator, seconds, condemn
         <div /* top */>
           <p> You are the </p>
           <p> {role} </p>
-          {["mafia", "doctor", "cop", "innocent"].map((role, index) => {
+          {["mafia", "doctor", "cop", "fool", "innocent"].map((role, index) => {
             return <button onClick={() => description(role)}> {role} </button>
           })}
           {checkRole ? (
@@ -100,7 +106,7 @@ export function Dusk({ socket, username, room, role, spectator, seconds, condemn
   options();
   return (
     <div>
-      {/* constant() */}
+      { constant() }
       <p> dusk </p>
       {seconds}
 

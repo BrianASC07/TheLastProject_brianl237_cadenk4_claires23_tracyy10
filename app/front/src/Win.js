@@ -1,8 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { JoinRoom } from './JoinRoom.js';
 
-export function Win({socket, username, room}) {
+export function Win({socket, username, room, condition}) {
   const [seconds, setSeconds] = useState(5);
+  const [whoWon, setWhoWon] =  useState("");
+  const [uno, setUno] = useState(true);
+  
+  // socket.emit("test", condition);
 
   useEffect(() => { // timer ticks down every second
     return () => {
@@ -12,15 +16,29 @@ export function Win({socket, username, room}) {
     }
   }, []);
 
+  if (uno) {
+    if (condition === "town") {
+      setWhoWon("The townsfolk have eliminated all mafia from their party!");
+      setUno(false);
+    }
+    else if (condition === "mafia") {
+      setWhoWon("The mafia has killed all other members in the party!");
+      setUno(false);
+    }
+    else if (condition === "fool") {
+      setWhoWon("As the fool takes their last breath, you realize that you've made a mistake. The fool has won by getting themself condemned!")
+      setUno(false);
+    }
+  }
+
   if (seconds <= 0) {
     socket.emit("force_disconnect", [username, room]);
     window.location.reload();
-    return <JoinRoom socket={socket}/>
   }
 
   return (
     <div>
-      <p> win condition met </p>
+      <p> { whoWon } </p>
       <p> room closes in: </p>
       <p> {seconds} </p>
     </div>
