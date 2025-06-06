@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Morning } from './Morning.js';
-import { script } from './narration.js';
+import { script } from './Narration.js';
 
 const styles = {
   container: {
@@ -298,6 +298,7 @@ export function Dawn({
       {constant()}
       <div style={styles.section}>
         <div style={styles.title}>Dawn</div>
+        <p> {ifNarration()} </p>
         <div style={styles.timer}>{seconds}s</div>
         {ifCop()}
       </div>
