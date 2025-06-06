@@ -402,7 +402,7 @@ const Canvas = props => {
           <div style={styles.title}>Dawn Phase</div>
           <div style={styles.role}>You are the <span>{role}</span></div>
           <div>
-            {["mafia", "doctor", "cop", "innocent", "fool"].map((roleName) => (
+            {["mafia", "doctor", "cop", "fool", "innocent"].map((roleName) => (
               <button
                 key={roleName}
                 style={styles.button}
