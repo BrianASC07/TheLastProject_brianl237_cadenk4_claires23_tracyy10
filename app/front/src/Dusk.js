@@ -2,6 +2,115 @@ import React, { useRef, useEffect, useState } from "react";
 import { Night } from './Night.js';
 import guillotine from "./animations/condemn.png";
 
+const styles = {
+  container: {
+    background: 'linear-gradient(135deg, #eed6b7 0%, #b6b8d6 100%)',
+    color: '#23244a',
+    minHeight: '100vh',
+    padding: '40px',
+    borderRadius: '18px',
+    boxShadow: '0 8px 32px 0 rgba(185, 153, 77, 0.13)',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+  },
+  section: {
+    background: 'rgba(255,255,255,0.92)',
+    borderRadius: '15px',
+    padding: '24px 36px',
+    margin: '16px 0',
+    boxShadow: '0 2px 8px 0 rgba(186, 168, 120, 0.10)',
+    width: '100%',
+    maxWidth: '480px',
+    textAlign: 'center',
+  },
+  title: {
+    fontSize: '2.2rem',
+    fontWeight: 700,
+    letterSpacing: '2px',
+    marginBottom: '12px',
+    color: '#bfa261',
+    textShadow: '0 2px 12px #fff9, 0 1px 1px #fff8',
+  },
+  role: {
+    fontSize: '1.35rem',
+    fontWeight: 600,
+    margin: '10px 0 18px 0',
+    color: '#7e7fff',
+    textTransform: 'capitalize',
+    textShadow: '0 1px 8px #d2d2fa66',
+  },
+  button: {
+    background: 'linear-gradient(90deg, #ffd86b 0%, #7e7fff 100%)',
+    color: '#23244a',
+    border: 'none',
+    borderRadius: '8px',
+    padding: '10px 22px',
+    margin: '7px 7px 7px 0',
+    fontSize: '1.05rem',
+    fontWeight: 600,
+    letterSpacing: '1px',
+    cursor: 'pointer',
+    transition: 'all 0.21s cubic-bezier(.4,0,.2,1)',
+    boxShadow: '0 2px 16px #ffd86b33',
+  },
+  buttonClose: {
+    background: 'linear-gradient(90deg, #ff6b6b 0%, #ffd86b 100%)',
+    color: '#23244a',
+    border: 'none',
+    borderRadius: '50%',
+    width: '32px',
+    height: '32px',
+    fontSize: '1.1rem',
+    fontWeight: 900,
+    cursor: 'pointer',
+    margin: '10px 0 0 0',
+    boxShadow: '0 2px 8px #f66b6b11',
+    transition: 'background 0.18s',
+  },
+  timer: {
+    fontSize: '1.25rem',
+    fontWeight: 600,
+    margin: '18px 0 10px 0',
+    color: '#bfa261',
+    textShadow: '0 1px 6px #ffd86b55',
+  },
+  userList: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    margin: '10px 0 0 0',
+    fontSize: '1.09rem',
+    color: '#264673',
+  },
+  spectatingList: {
+    color: '#a3a3bb',
+    fontStyle: 'italic',
+    fontSize: '0.98rem',
+    marginTop: '5px',
+  },
+  msg: {
+    background: 'rgba(186,168,120,.12)',
+    borderRadius: '8px',
+    padding: '8px 16px',
+    margin: '16px auto 8px auto',
+    color: '#bfa261',
+    fontWeight: 500,
+    fontSize: '1.1rem',
+    width: 'fit-content',
+    boxShadow: '0 2px 8px #ffd86b11',
+  },
+  descriptionBox: {
+    background: 'rgba(255,255,255,.14)',
+    borderRadius: '12px',
+    margin: '18px 0 10px 0',
+    padding: '16px 20px',
+    color: '#23244a',
+    boxShadow: '0 1px 6px #ffd86b33',
+    position: 'relative',
+  },
+};
+
 export function Dusk({ socket, username, room, role, spectator, seconds, condemn, setCondemned}) {
   const [aliveUserList, setAliveUserList] = useState([]);
   const [spectatingUserList, setSpectatingUserList] = useState([]);
@@ -60,39 +169,54 @@ export function Dusk({ socket, username, room, role, spectator, seconds, condemn
       (async() => {
         await socket.emit("set_condemned", condemn);
       })();
-      return `${condemn} has been sentenced to death by DEATH!!!!`
+      return (
+        <div style={styles.msg}>
+          <b>{condemn}</b> has been sentenced to death by DEATH!!!!
+        </div>
+      );
     }
     else {
-      return `A decision could not be reached. Everyone returns to their own cabins feeling uneasy.`
+      return (
+        <div style={styles.msg}>
+          A decision could not be reached. Everyone returns to their own cabins feeling uneasy.
+        </div>
+      );
     }
-  }
-
-  if (seconds <= 1) { // ends the night after timer is up
-    if (doOnce2) {
-      (async () => {
-        try {
-          await socket.emit("reset_condemn_cnts", room);
-          if (username === condemn) {
-            setIsSpectator(true);
-          }
-          setDoOnce2(false);
-        } catch (error) { };
-      })();
-    }
-  }
-
-  const options = async () => {
-    await socket.emit("request_alive_userList", room);
-    await socket.emit("request_spectating_userList", room);
   };
 
-  socket.on("user_alive_list", (data) => {
-    setAliveUserList(data);
-  });
+  // Timer end logic
+  useEffect(() => {
+    if (seconds <= 1) {
+      if (doOnce2) {
+        (async () => {
+          try {
+            await socket.emit("reset_condemn_cnts", room);
+            if (username === condemn) {
+              setIsSpectator(true);
+            }
+            setDoOnce2(false);
+          } catch (error) { };
+        })();
+      }
+    }
+    // eslint-disable-next-line
+  }, [seconds, doOnce2, socket, room, username, condemn]);
 
-  socket.on("user_spectating_list", (data) => {
-    setSpectatingUserList(data);
-  });
+  // Get user lists
+  useEffect(() => {
+    socket.on("user_alive_list", setAliveUserList);
+    socket.on("user_spectating_list", setSpectatingUserList);
+    // Request lists on mount
+    (async () => {
+      await socket.emit("request_alive_userList", room);
+      await socket.emit("request_spectating_userList", room);
+    })();
+    return () => {
+      socket.off("user_alive_list", setAliveUserList);
+      socket.off("user_spectating_list", setSpectatingUserList);
+    };
+    // eslint-disable-next-line
+  }, [socket, room]);
 
   function description(role) {
     setCheckRole(true);
@@ -106,58 +230,73 @@ export function Dusk({ socket, username, room, role, spectator, seconds, condemn
       setRoleDescription("The cop is a member of the townsfolk with a very special job. Every night, they can select another player and investigate them and find out their role!");
     }
     else if (role === "fool") {
-      setRoleDescription("The fool is neither aligned with the townsfolk nor the mafia. They win upon getting condemned and hung.")
+      setRoleDescription("The fool is neither aligned with the townsfolk nor the mafia. They win upon getting condemned and hung.");
     }
     else {
       setRoleDescription("The innocent is a member of the townsfolk.");
     }
   }
 
-  const constant = () => {
+  function constant() {
     return (
-      <div>
-        <div /* top */>
-          <p> You are the </p>
-          <p> {role} </p>
-          {["mafia", "doctor", "cop", "fool", "innocent"].map((role, index) => {
-            return <button onClick={() => description(role)}> {role} </button>
-          })}
-          {checkRole ? (
-            <div>
-              <p> {roleDescription} </p>
-              <button onClick={() => setCheckRole(false)}> x </button>
+      <div style={styles.section}>
+        <div>
+          <div style={styles.title}>Dusk Phase</div>
+          <div style={styles.role}>You are the <span>{role}</span></div>
+          <div>
+            {["mafia", "doctor", "cop", "fool", "innocent"].map((roleName) => (
+              <button
+                key={roleName}
+                style={styles.button}
+                onClick={() => description(roleName)}
+              >
+                {roleName.charAt(0).toUpperCase() + roleName.slice(1)}
+              </button>
+            ))}
+          </div>
+          {checkRole && (
+            <div style={styles.descriptionBox}>
+              <div>{roleDescription}</div>
+              <button
+                style={styles.buttonClose}
+                onClick={() => setCheckRole(false)}
+                aria-label="Close"
+              >
+                ×
+              </button>
             </div>
-          ) : (
-            ""
           )}
-          <p> Time left : </p>
-          {seconds}
+          <div style={styles.timer}>🌆 Time left: <span>{seconds}s</span></div>
         </div>
         { Canvas() }
-        <div /* side */>
-          <p> Alive : </p>
-          {aliveUserList.map((username, index) => {
-            return <p>{username}</p>
-          })}
-          <p> Spectating : </p>
-          {spectatingUserList.map((username, index) => {
-            return <p>{username}</p>
-          })}
+        <div style={{ marginTop: '18px' }}>
+          <div style={{ fontWeight: 600, color: '#bfa261' }}>Alive:</div>
+          <div style={styles.userList}>
+            {aliveUserList.map((uname, idx) => (
+              <span key={uname + idx}>{uname}</span>
+            ))}
+          </div>
+          <div style={{ fontWeight: 600, color: '#7e7fff', marginTop: 12 }}>Spectating:</div>
+          <div style={styles.spectatingList}>
+            {spectatingUserList.map((uname, idx) => (
+              <span key={uname + idx}>{uname}</span>
+            ))}
+          </div>
         </div>
       </div>
-    )
+    );
   }
 
-  options();
   return (
-    <div>
+    <div style={styles.container}>
       { constant() }
-      <p> dusk </p>
-      {seconds}
-
-      <p> {show_condemned()} </p>
+      <div style={styles.section}>
+        <div style={styles.title}>Dusk</div>
+        <div style={styles.timer}>{seconds}s</div>
+        {show_condemned()}
+      </div>
     </div>
-  )
+  );
 }
 
 export default Dusk
