@@ -452,6 +452,7 @@ const Canvas = props => {
       {constant()}
       <div style={styles.section}>
         <div style={styles.title}>Dawn</div>
+        <p> {ifNarration()} </p>
         <div style={styles.timer}>{seconds}s</div>
         {ifCop()}
       </div>
