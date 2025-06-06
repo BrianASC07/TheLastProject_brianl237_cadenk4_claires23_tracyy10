@@ -102,13 +102,22 @@ claireS -- 2025-06-03 11:00
 tracyY --2025-06-03 12:37
 - Win conditions added
 
+brianL --2025-06-04 10:30
+- moved timer to backend to stop everything from desyncing
+
 claireS -- 2025-06-04 11:00
 - used react to create canvas
 - tried to fix animations showing up on top of each other
 
+brianL --2025-06-04 1:45
+- fixed condemn and cop functionality with new timer
+
 claireS -- 2025-06-05 3:00
 - edit narration cases
 - canvas is working in dawn and dusk
+
+brianL --2025-06-05 10:30
+- debugging - fixed timer not stopping when game ends
 
 tracyY --2025-06-05 11:14
 - fool
