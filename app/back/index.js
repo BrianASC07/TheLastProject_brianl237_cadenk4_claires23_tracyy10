@@ -28,6 +28,9 @@ const io = new Server(server, {
   },
 });
 
+// Object to keep track of intervals for each room
+const roomIntervals = {};
+
 io.on("connection", (socket) => { // whenever a connection to the serve is detected, grabs 'socket' or the information of the connection
   (async () => { try { await createTable() } catch (error) { } })();
   console.log(`User connected: ${socket.id}`); // every connection is given a unique id
@@ -60,7 +63,11 @@ io.on("connection", (socket) => { // whenever a connection to the serve is detec
 
         io.to(data).emit("time_update", { timeLeft, phaseIndex });
 
-        const interval = setInterval(async () => {
+        if (roomIntervals[data]) {
+          clearInterval(roomIntervals[data]);
+        }
+
+        roomIntervals[data] = setInterval(async () => {
           timeLeft -= 1;
 
           if (timeLeft > 0) {
@@ -161,6 +168,11 @@ io.on("connection", (socket) => { // whenever a connection to the serve is detec
         const userID = await get_user_id(data[0], data[1]);
         await remove_from_room(userID);
         io.in(userID).disconnectSockets();
+
+        if (roomIntervals[data[1]]) {
+          clearInterval(roomIntervals[data[1]]);
+          delete roomIntervals[data[1]];
+        }
       } catch (error) { }
     })();
   });
@@ -450,8 +462,9 @@ function get_user_id(username, room) {
       }
       if (typeof(rows) !== undefined) {
         resolve(rows.userID);
+      } else {
+        resolve(null);
       }
-      resolve(console.log("(timing misaligned, most likely)"));
     });
     close(db);
   });
