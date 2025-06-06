@@ -54,6 +54,9 @@ cadenK --2025-5-22 11:00
 claireS -- 2025-05-26 1:00
 - Starter code for animations
 
+claireS -- 2025-05-28 11:00
+- stroll animation
+
 tracyY --2025-05-28 5:03
 - added waiting room
 - added role effects on dawn page
@@ -68,9 +71,15 @@ tracyY --2025-05-28 11:45
 tracyY --2025-05-29 X:XX
 - added cop roles
 
+claireS -- 2025-05-29 11:00
+- dog animation
+
 tracyY --2025-05-30 X:XX
 - waiting room now shows how many members (and who) are in the room
 - working on evening and dusk
+
+claireS -- 2025-05-30 11:00
+- linking animation to narration
 
 tracyY --2025-06-01 X:XX
 - finished evening
@@ -82,8 +91,24 @@ cadenK -- 2025-06-01 X:XX
 - Moved over CSS from game.html to the actual functioning game
 - Added flash messages for full room and spectators
 
+claireS -- 2025-06-02 11:00
+- stitching together different scenes
+- soda animation
+
+claireS -- 2025-06-03 11:00
+- finished different scenarios for murder & condemning
+- animated condemn
+
 tracyY --2025-06-03 12:37
 - Win conditions added
+
+claireS -- 2025-06-04 11:00
+- used react to create canvas
+- tried to fix animations showing up on top of each other
+
+claireS -- 2025-06-05 3:00
+- edit narration cases
+- canvas is working in dawn and dusk
 
 tracyY --2025-06-05 11:14
 - fool
