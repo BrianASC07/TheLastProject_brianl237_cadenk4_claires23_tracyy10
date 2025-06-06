@@ -90,5 +90,8 @@ tracyY --2025-06-05 11:14
 - narration
 - a lot of failed debugging
 
+cadenK --2025-06-05 11:14
+- Finished CSS and fixed bugs throughout entire game
+
 JavaScript style revisions 5/23:
  - the biggest issue is most likely with the usage of arrow functions instead of function declarations even when they are not necessary, such as in App.js. If time allows, we will likely go through the code and clean up functions as needed
