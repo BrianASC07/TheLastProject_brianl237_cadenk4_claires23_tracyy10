@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { Night } from './Night.js';
+import guillotine from "./animations/condemn.png";
 
 const styles = {
   container: {
@@ -119,6 +120,49 @@ export function Dusk({ socket, username, room, role, spectator, seconds, condemn
   const [doOnce2, setDoOnce2] = useState(true);
   const [redirect, setRedirect] = useState(false);
   const [redirectOnce, setRedirectOnce] = useState(true);
+  const [done, setDone] = useState(false);
+
+  const Canvas = props => {
+    const canvaS = useRef(null);
+
+    useEffect(() => {
+      const updateCanvas = canvaS.current;
+      if (!updateCanvas) { // if null
+        return;
+      }
+      const context = updateCanvas.getContext('2d');
+      const image = new Image();
+      image.src = guillotine;
+      var intervalID = null;
+      var row = 0;
+      var col = 0;
+      var speed = 300;
+
+      image.onload = function () {
+        if (!done) {
+          setDone(true);
+          intervalID = setInterval(animate, speed, 5, 5, 2);
+        }
+      }
+
+      function animate(rows, cols, endCol) {
+        if (col === cols) {
+            col = 0;
+            row += 1;
+        }
+        console.log(row, col);
+        context.clearRect(0, 0, 500, 500);
+        context.drawImage(image, 0+480*col, 0+480*row, 480, 480, 0, 0, 500, 500);
+        if (row === (rows-1) && col === (endCol-1)) {
+            clearInterval(intervalID);
+        }
+
+        col += 1;
+      }
+
+    }, []);
+    return <canvas ref={canvaS} {...props} width="500" height="500"/>
+  }
 
   const show_condemned = () => {
     if (condemn !== "") {
@@ -224,6 +268,7 @@ export function Dusk({ socket, username, room, role, spectator, seconds, condemn
           )}
           <div style={styles.timer}>🌆 Time left: <span>{seconds}s</span></div>
         </div>
+        { Canvas() }
         <div style={{ marginTop: '18px' }}>
           <div style={{ fontWeight: 600, color: '#bfa261' }}>Alive:</div>
           <div style={styles.userList}>

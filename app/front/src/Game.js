@@ -7,7 +7,7 @@ import Dusk from './Dusk.js';
 
 const phases = [
   { name: "Night", duration: 10 },
-  { name: "Dawn", duration: 15 },
+  { name: "Dawn", duration: 20 },
   { name: "Morning", duration: 20 },
   { name: "Evening", duration: 25 },
   { name: "Dusk", duration: 30 },
