@@ -2,159 +2,345 @@ import React, { useEffect, useState } from "react";
 import { Evening } from './Evening.js';
 import { Win } from './Win.js';
 
+const styles = {
+  container: {
+    background: 'linear-gradient(135deg, #e6e9f0 0%, #ffe7b3 100%)',
+    color: '#23244a',
+    minHeight: '100vh',
+    padding: '40px',
+    borderRadius: '18px',
+    boxShadow: '0 8px 32px 0 rgba(220, 185, 100, 0.10)',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+  },
+  section: {
+    background: 'rgba(255,255,255,0.94)',
+    borderRadius: '15px',
+    padding: '24px 36px',
+    margin: '16px 0',
+    boxShadow: '0 2px 8px 0 rgba(210, 178, 120, 0.10)',
+    width: '100%',
+    maxWidth: '540px',
+    textAlign: 'center',
+  },
+  title: {
+    fontSize: '2.2rem',
+    fontWeight: 700,
+    letterSpacing: '2px',
+    marginBottom: '12px',
+    color: '#e8b067',
+    textShadow: '0 2px 12px #ffe9b766, 0 1px 1px #fff8',
+  },
+  role: {
+    fontSize: '1.35rem',
+    fontWeight: 600,
+    margin: '10px 0 18px 0',
+    color: '#6b8aff',
+    textTransform: 'capitalize',
+    textShadow: '0 1px 8px #d2d2fa66',
+  },
+  button: {
+    background: 'linear-gradient(90deg, #ffd86b 0%, #6b8aff 100%)',
+    color: '#23244a',
+    border: 'none',
+    borderRadius: '8px',
+    padding: '10px 22px',
+    margin: '7px 7px 7px 0',
+    fontSize: '1.05rem',
+    fontWeight: 600,
+    letterSpacing: '1px',
+    cursor: 'pointer',
+    transition: 'all 0.21s cubic-bezier(.4,0,.2,1)',
+    boxShadow: '0 2px 16px #ffd86b33',
+  },
+  buttonClose: {
+    background: 'linear-gradient(90deg, #ff6b6b 0%, #ffd86b 100%)',
+    color: '#23244a',
+    border: 'none',
+    borderRadius: '50%',
+    width: '32px',
+    height: '32px',
+    fontSize: '1.1rem',
+    fontWeight: 900,
+    cursor: 'pointer',
+    margin: '10px 0 0 0',
+    boxShadow: '0 2px 8px #f66b6b11',
+    transition: 'background 0.18s',
+  },
+  timer: {
+    fontSize: '1.25rem',
+    fontWeight: 600,
+    margin: '18px 0 10px 0',
+    color: '#e8b067',
+    textShadow: '0 1px 6px #ffd86b55',
+  },
+  userList: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    margin: '10px 0 0 0',
+    fontSize: '1.09rem',
+    color: '#264673',
+  },
+  spectatingList: {
+    color: '#a3a3bb',
+    fontStyle: 'italic',
+    fontSize: '0.98rem',
+    marginTop: '5px',
+  },
+  descriptionBox: {
+    background: 'rgba(255,255,255,.14)',
+    borderRadius: '12px',
+    margin: '18px 0 10px 0',
+    padding: '16px 20px',
+    color: '#23244a',
+    boxShadow: '0 1px 6px #ffd86b33',
+    position: 'relative',
+  },
+  chatWindow: {
+    background: 'rgba(255,255,255,0.92)',
+    borderRadius: '15px',
+    boxShadow: '0 2px 8px 0 #ffd86b22',
+    padding: '0 0 14px 0',
+    marginTop: 24,
+    width: '100%',
+    maxWidth: '540px',
+    display: 'flex',
+    flexDirection: 'column',
+  },
+  chatHeader: {
+    background: 'linear-gradient(90deg, #ffd86b 0%, #ffe7b3 100%)',
+    borderTopLeftRadius: '15px',
+    borderTopRightRadius: '15px',
+    padding: '16px 0 10px 0',
+    fontWeight: 700,
+    fontSize: '1.22rem',
+    color: '#b67c14',
+    letterSpacing: '1px',
+    boxShadow: '0 2px 8px #ffd86b11',
+  },
+  chatBody: {
+    padding: '12px 18px',
+    minHeight: '240px',
+    maxHeight: '260px',
+    overflowY: 'auto',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '9px',
+  },
+  message: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    margin: '0 0 2px 0',
+  },
+  messageContent: {
+    background: 'rgba(255,232,160,.38)',
+    color: '#23244a',
+    padding: '7px 14px',
+    borderRadius: '8px',
+    fontWeight: 500,
+    fontSize: '1.08rem',
+    maxWidth: '340px',
+    wordBreak: 'break-word',
+    boxShadow: '0 1px 5px #ffd86b22',
+  },
+  messageMeta: {
+    fontSize: '0.91rem',
+    color: '#b67c14',
+    display: 'flex',
+    gap: '8px',
+    marginTop: '2px',
+    opacity: 0.82,
+  },
+  chatFooter: {
+    display: 'flex',
+    alignItems: 'center',
+    padding: '10px 14px 0 14px',
+    gap: '8px',
+  },
+  input: {
+    flex: 1,
+    borderRadius: '7px',
+    border: '1px solid #ffd86b99',
+    padding: '9px 13px',
+    fontSize: '1.03rem',
+    outline: 'none',
+    marginRight: '8px',
+    background: '#fff8e1',
+    color: '#23244a',
+  },
+  sendButton: {
+    background: 'linear-gradient(90deg, #ffd86b 0%, #6b8aff 100%)',
+    color: '#23244a',
+    border: 'none',
+    borderRadius: '7px',
+    padding: '8px 15px',
+    fontSize: '1.15rem',
+    fontWeight: 700,
+    cursor: 'pointer',
+    boxShadow: '0 2px 8px #ffd86b22',
+    transition: 'background 0.14s',
+  },
+};
+
 export function Morning({ socket, username, room, role, spectator, seconds }) {
-    const [currentMessage, setCurrentMessage] = useState(""); // use setCurrentMessage to update var currentMessage
-    const [messageList, setMessageList] = useState([]);
-    const [aliveUserList, setAliveUserList] = useState([]);
-    const [spectatingUserList, setSpectatingUserList] = useState([]);
-    const [checkRole, setCheckRole] = useState(false);
-    const [roleDescription, setRoleDescription] = useState("");
-    const [redirect, setRedirect] = useState(false);
-    const [redirectOnce, setRedirectOnce] = useState(true);
-    const [youWin, setYouWin] = useState([false, ""]);
+  const [currentMessage, setCurrentMessage] = useState("");
+  const [messageList, setMessageList] = useState([]);
+  const [aliveUserList, setAliveUserList] = useState([]);
+  const [spectatingUserList, setSpectatingUserList] = useState([]);
+  const [checkRole, setCheckRole] = useState(false);
+  const [roleDescription, setRoleDescription] = useState("");
+  const [redirect, setRedirect] = useState(false);
+  const [redirectOnce, setRedirectOnce] = useState(true);
+  const [youWin, setYouWin] = useState(false);
 
-    const sendMessage = async () => { // ASYNC causes this function to wait for the AWAIT statement to be finished (a new message is sent) before it runs (otherwise the data required to complete this func would be missing)
-        if (currentMessage !== "" && spectator === false) { // cannot send empty messages
-            const messageData = { // create a message object to emit
-                room: room,
-                author: username,
-                message: currentMessage,
-                time: new Date(Date.now()).getHours() + ":" + new Date(Date.now()).getMinutes(),
-                // built into javascript, you can grab current time values
-            };
+  const sendMessage = async () => {
+    if (currentMessage !== "" && spectator === false) {
+      const messageData = {
+        room: room,
+        author: username,
+        message: currentMessage,
+        time: new Date(Date.now()).getHours() + ":" + new Date(Date.now()).getMinutes(),
+      };
 
-            await socket.emit("send_message", messageData); // calls send_message on backend and sends the mesage object
-            setMessageList((list) => [...list, messageData]); // adds your own message to the list
-            setCurrentMessage(""); // resets your typie bar to nada
-        }
-    };
-
-    useEffect(() => { // will call the function inside the useEffect whenever a specific change in socket occurs
-        socket.off("receive_message").on("receive_message", (data) => { // the change will be when 'receive_message' is called
-            // socket.off once bc it was sending twice (prevents that instance from running)
-            setMessageList((list) => [...list, data]); // appends data (new message) to the current messageList
-        });
-    }, [socket]);
-
-    const options = async () => {
-        await socket.emit("request_alive_userList", room);
-        await socket.emit("request_spectating_userList", room);
-        await socket.emit("get_all_mafia_in_room", room);
-    };
-
-    socket.on("user_alive_list", (data) => {
-        setAliveUserList(data);
-    });
-
-    socket.on("user_spectating_list", (data) => {
-        setSpectatingUserList(data);
-    });
-
-    socket.on("recieve_cnt_mafia", (data) => {
-      if (data === 0) {
-        setYouWin([true, "town"]);
-      }
-    });
-
-    if (youWin[0]) {
-        return <Win socket={ socket } username={ username} room={room} condition={youWin[1]}/>
+      await socket.emit("send_message", messageData);
+      setMessageList((list) => [...list, messageData]);
+      setCurrentMessage("");
     }
+  };
 
-    function description(role) {
+  useEffect(() => {
+    socket.off("receive_message").on("receive_message", (data) => {
+      setMessageList((list) => [...list, data]);
+    });
+  }, [socket]);
+
+  const options = async () => {
+    await socket.emit("request_alive_userList", room);
+    await socket.emit("request_spectating_userList", room);
+    await socket.emit("get_all_mafia_in_room", room);
+  };
+
+  useEffect(() => {
+    socket.on("user_alive_list", setAliveUserList);
+    socket.on("user_spectating_list", setSpectatingUserList);
+    socket.on("recieve_cnt_mafia", (data) => {
+      if (data === 0) setYouWin(true);
+    });
+    options();
+    return () => {
+      socket.off("user_alive_list", setAliveUserList);
+      socket.off("user_spectating_list", setSpectatingUserList);
+      socket.off("recieve_cnt_mafia");
+    };
+    // eslint-disable-next-line
+  }, [socket, room]);
+
+  if (youWin) {
+    return <Win socket={socket} username={username} room={room} />;
+  }
+
+  function description(role) {
     setCheckRole(true);
     if (role === "mafia") {
-      setRoleDescription("The mafia's goal is to kill off all the other members in the party while not getting caught. Every night, they can select another player and send death vibes their way!");
+      setRoleDescription("The mafia is the evil guy, blah blah blah, kill someone each night...");
     }
     else if (role === "doctor") {
-      setRoleDescription("The doctor is a member of the townsfolk with a very special job. Every night, they can select another player and protect them from misfortune.");
+      setRoleDescription("The doctor is a pretty cool role, blah blah blah, grant invincibility to a person for a night...");
     }
     else if (role === "cop") {
-      setRoleDescription("The cop is a member of the townsfolk with a very special job. Every night, they can select another player and investigate them and find out their role!");
-    }
-    else if (role === "fool") {
-      setRoleDescription("The fool is neither aligned with the townsfolk nor the mafia. They win upon getting condemned and hung.")
+      setRoleDescription("The cop is cool i guess, blah blah blah, select someone to investigate each night to learn their role in the morning...");
     }
     else {
-      setRoleDescription("The innocent is a member of the townsfolk.");
+      setRoleDescription("The innocent is a basic role... you have no special role at night. Fear not because there is power in numbers, pay attention to the others' behaviour and vote to condemn the suspicious in the morning!");
     }
   }
 
-    const constant = () => {
-        return (
-            <div>
-                <div /* top */>
-                    <p> You are the </p>
-                    <p> {role} </p>
-                    {["mafia", "doctor", "cop", "fool", "innocent"].map((role, index) => {
-                        return <button onClick={() => description(role)}> {role} </button>
-                    })}
-                    {checkRole ? (
-                        <div>
-                            <p> {roleDescription} </p>
-                            <button onClick={() => setCheckRole(false)}> x </button>
-                        </div>
-                    ) : (
-                        ""
-                    )}
-                    <p> Time left : </p>
-                    {seconds}
-                </div>
-                <div /* side */>
-                    <p> Alive : </p>
-                    {aliveUserList.map((username, index) => {
-                        return <p>{username}</p>
-                    })}
-                    <p> Spectating : </p>
-                    {spectatingUserList.map((username, index) => {
-                        return <p>{username}</p>
-                    })}
-                </div>
-            </div>
-        )
-    }
-
-    options();
+  function constant() {
     return (
+      <div style={styles.section}>
         <div>
-            { constant() }
-            <div className="chat-window">
-                <div className="chat-header">
-                    <p> chat header!!! </p>
-                    {seconds}
-                </div>
-                <div className="chat-body">
-                    {messageList.map((messageContent, index) => { // .map returns a new array by modifying every element of the og array (aka for loop!)
-                        return (
-                            <div className="message">
-                                <div>
-                                    <div className="message-content">
-                                        <p>{messageContent.message}</p> {/*returns the message component of each messageData (ref above)*/}
-                                    </div>
-                                    <div className="message-meta">
-                                        <p>{messageContent.time}&nbsp;</p>
-                                        <p>{messageContent.author}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        );
-                    })}
-                </div>
-                <div className="chat-footer"> {/* takes in message */}
-                    <input
-                        type="text"
-                        value={currentMessage} // allows you to clear the message when youre done typing
-                        placeholder="type ur message..."
-                        onChange={(event) => {
-                            setCurrentMessage(event.target.value); // stores message for emitting
-                        }}
-                        onKeyPress={(event) => { event.key === 'Enter' && sendMessage(); }} // if press enter key, will send message
-                    />
-                    <button onClick={sendMessage}>&#9658;</button>
-                    {/* upon clicking, calls sendMessage */}
-                </div>
+          <div style={styles.title}>Morning Phase</div>
+          <div style={styles.role}>You are the <span>{role}</span></div>
+          <div>
+            {["mafia", "doctor", "cop", "innocent"].map((roleName) => (
+              <button
+                key={roleName}
+                style={styles.button}
+                onClick={() => description(roleName)}
+              >
+                {roleName.charAt(0).toUpperCase() + roleName.slice(1)}
+              </button>
+            ))}
+          </div>
+          {checkRole && (
+            <div style={styles.descriptionBox}>
+              <div>{roleDescription}</div>
+              <button
+                style={styles.buttonClose}
+                onClick={() => setCheckRole(false)}
+                aria-label="Close"
+              >
+                ×
+              </button>
             </div>
+          )}
+          <div style={styles.timer}>☀️ Time left: <span>{seconds}s</span></div>
         </div>
+        <div style={{ marginTop: '18px' }}>
+          <div style={{ fontWeight: 600, color: '#e8b067' }}>Alive:</div>
+          <div style={styles.userList}>
+            {aliveUserList.map((uname, idx) => (
+              <span key={uname + idx}>{uname}</span>
+            ))}
+          </div>
+          <div style={{ fontWeight: 600, color: '#6b8aff', marginTop: 12 }}>Spectating:</div>
+          <div style={styles.spectatingList}>
+            {spectatingUserList.map((uname, idx) => (
+              <span key={uname + idx}>{uname}</span>
+            ))}
+          </div>
+        </div>
+      </div>
     );
+  }
+
+  return (
+    <div style={styles.container}>
+      {constant()}
+      <div style={styles.chatWindow}>
+        <div style={styles.chatHeader}>
+          Chat Room <span style={{ fontWeight: 400, marginLeft: 12 }}>{seconds}s</span>
+        </div>
+        <div style={styles.chatBody}>
+          {messageList.map((messageContent, index) => (
+            <div style={styles.message} key={index}>
+              <div style={styles.messageContent}>
+                <p style={{ margin: 0 }}>{messageContent.message}</p>
+              </div>
+              <div style={styles.messageMeta}>
+                <span>{messageContent.time}&nbsp;</span>
+                <span>{messageContent.author}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div style={styles.chatFooter}>
+          <input
+            style={styles.input}
+            type="text"
+            value={currentMessage}
+            placeholder="Type your message..."
+            onChange={(event) => setCurrentMessage(event.target.value)}
+            onKeyPress={(event) => { event.key === 'Enter' && sendMessage(); }}
+          />
+          <button style={styles.sendButton} onClick={sendMessage}>&#9658;</button>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default Morning
